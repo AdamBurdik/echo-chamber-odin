@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Echo Chamber",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/desktop/echo_chamber.bin", 
+            "cwd": "${workspaceFolder}",
+            "stopOnEntry": false,
+            "preLaunchTask": "build game"
+        }
+    ]
+}
