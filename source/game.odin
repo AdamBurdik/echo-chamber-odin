@@ -35,28 +35,28 @@ init :: proc() {
 	add_card_to_action(&queue, Card{
 		"dummy",
 		CardIcon.HEART,
-		[dynamic]string{"1"},
+		[dynamic]string{"Place trap", "infront"},
 		false,
 		false,
 	})
 	add_card_to_action(&queue, Card{
 		"dummy",
 		CardIcon.HEART,
-		[dynamic]string{"2"},
+		[dynamic]string{"Block 1", "adjent attack"},
 		false,
 		false,
 	})
 	add_card_to_action(&queue, Card{
 		"dummy",
 		CardIcon.HEART,
-		[dynamic]string{"3"},
+		[dynamic]string{"Rotate left"},
 		false,
 		false,
 	})
 	add_card_to_action(&queue, Card{
 		"dummy",
 		CardIcon.HEART,
-		[dynamic]string{"4"},
+		[dynamic]string{"Regenertion", "4HP / 3s"},
 		false,
 		false,
 	})
@@ -69,6 +69,7 @@ init :: proc() {
 	rl.InitWindow(DISPLAY_WIDTH, DISPLAY_HEIGHT, "Hello! Odin + Raylib on the web __float__")
 
 	virtual_texture = rl.LoadRenderTexture(VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
+	rl.SetTextureFilter(virtual_texture.texture, .POINT)
 	load_assets()
 
 	// Anything in `assets` folder is available to load.
@@ -88,8 +89,6 @@ init :: proc() {
 }
 
 update :: proc() {
-	clear(&renderer_pipeline.calls)
-
 	dt := rl.GetFrameTime()
 
 	sourceRec := rl.Rectangle{0, 0, VIRTUAL_WIDTH, -VIRTUAL_HEIGHT}
@@ -114,28 +113,27 @@ update :: proc() {
 	}
 
 	// -- Virtual Drawing --
-	// rl.BeginTextureMode(virtual_texture)
-	// {
-	// 	rl.ClearBackground({150, 0, 0, 255})
+	rl.BeginTextureMode(virtual_texture)
+	{
+		rl.ClearBackground({0, 0, 0, 255})
 
-	// 	draw_board(&board, &player)
-	// 	draw_player(&player)
-	// 	draw_queue(&queue)
-	// }
+		draw_board(&board, &player)
+		draw_player(&player)
+		draw_queue(&queue)
 
-	// rl.EndTextureMode()
-
-	draw_board(&board, &player)
-	draw_player(&player)
-	draw_queue(&queue)
-	draw_virtual_texture(backdrop_texture, 0, 0)
+		rl.DrawTexture(
+			backdrop_texture,
+			0, 0,
+			rl.WHITE,
+		)
+	}
+	rl.EndTextureMode()
 
 	// -- Actual Drawing --
 	rl.BeginDrawing()
 	{
 		rl.ClearBackground({0, 0, 0, 255})
-		draw_renderer()
-		// rl.DrawTexturePro(virtual_texture.texture, sourceRec, destRec, origin, 0, rl.WHITE)
+		rl.DrawTexturePro(virtual_texture.texture, sourceRec, destRec, origin, 0, rl.WHITE)
 
 		rl.DrawText(strings.clone_to_cstring(fmt.tprintf("Player pos: %d; %d", player.grid_pos.x, player.grid_pos.y)), 10, 10, 30, rl.GREEN)
 		rl.DrawFPS(10, 50)

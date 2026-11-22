@@ -32,10 +32,15 @@ draw_player :: proc(player: ^Player) {
 		texture = player_idle.right
 	}
 
-	draw_virtual_texture(
+	rl.DrawTextureEx(
 		texture,
-		BOARD_ORIGIN.x + f32(TILE_SIZE - PLAYER_WIDTH) / 2,
-		BOARD_ORIGIN.y + f32(player.hop_y - PLAYER_HEIGHT) / 4,
+		{
+			BOARD_ORIGIN.x + f32(TILE_SIZE - PLAYER_WIDTH) / 2,
+			BOARD_ORIGIN.y + f32(PLAYER_HEIGHT) / 1.5 + player.hop_y,
+		},
+		0,
+		1,
+		rl.WHITE,
 	)
 }
 

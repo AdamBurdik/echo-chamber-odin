@@ -1,6 +1,7 @@
 package game
 
 import "core:log"
+import "core:strings"
 import math "core:math"
 import rl "vendor:raylib"
 
@@ -61,11 +62,12 @@ draw_card :: proc(rect: rl.Rectangle, card: Card) {
 	}
 
 
-	draw_virtual_rectangle(rect.x, rect.y, rect.width, rect.height, color)
+	rl.DrawRectangle(i32(rect.x), i32(rect.y), i32(rect.width), i32(rect.height), color)
 
-	text_offset_y := i32(0)
+	text_offset_y := f32(0)
 	for line in card.lines {
-		draw_virtual_text(rect.x, rect.y, line, 50, rl.WHITE)
+		rl.SetTextureFilter(tiny5_font.texture, rl.TextureFilter.POINT)
+		rl.DrawTextEx(tiny5_font, strings.clone_to_cstring(line), {rect.x + 2, rect.y + text_offset_y}, 9, 0, rl.WHITE)
 
 		text_offset_y += 10
 	}
@@ -73,9 +75,9 @@ draw_card :: proc(rect: rl.Rectangle, card: Card) {
 
 draw_queue :: proc(queue: ^Queue) {
 	// Draw background
-	draw_virtual_rectangle(
-		ACTION_QUEUE_ORIGIN.x,
-		ACTION_QUEUE_ORIGIN.y,
+	rl.DrawRectangle(
+		i32(ACTION_QUEUE_ORIGIN.x),
+		i32(ACTION_QUEUE_ORIGIN.y),
 		ACTION_QUEUE_WIDTH,
 		ACTION_QUEUE_HEIGHT,
 		rl.GRAY,

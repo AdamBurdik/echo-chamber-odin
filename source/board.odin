@@ -83,7 +83,7 @@ draw_board :: proc(board: ^Board, player: ^Player) {
 			x := BOARD_ORIGIN.x + f32((grid_x - player.grid_pos.x) * TILE_SIZE) + board.camera_offset.x
 			y := BOARD_ORIGIN.y + f32((grid_y - player.grid_pos.y) * TILE_SIZE) + board.camera_offset.y
 
-			draw_virtual_texture(empty_tile_texture, x, y)
+			rl.DrawTextureEx(empty_tile_texture, {x, y}, 0, 1, rl.WHITE)
 			// draw_text(x, y, fmt.tprintf("x: %d", grid_x), 18, rl.WHITE)
 			// draw_text(x, y + 4, fmt.tprintf("y: %d", grid_y), 18, rl.WHITE)
         }

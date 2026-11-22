@@ -41,11 +41,11 @@ check_collision :: proc {
 }
 
 get_mouse_x :: proc() -> f32 {
-    return f32(rl.GetMouseX() / (DISPLAY_WIDTH / VIRTUAL_WIDTH))
+    return f32(rl.GetMouseX() / (rl.GetScreenWidth() / VIRTUAL_WIDTH))
 }
 
 get_mouse_y :: proc() -> f32 {
-    return f32(rl.GetMouseY() / (DISPLAY_HEIGHT / VIRTUAL_HEIGHT))
+    return f32(rl.GetMouseY() / (rl.GetScreenHeight() / VIRTUAL_HEIGHT))
 }
 
 ease_in_out_cubic :: proc(t: f32) -> f32 {
