@@ -41,21 +41,70 @@ init :: proc() {
 	})
 	add_card_to_action(&queue, Card{
 		"dummy",
-		CardIcon.HEART,
+		CardIcon.ARROW,
 		[dynamic]string{"Block 1", "adjent attack"},
 		false,
 		false,
 	})
 	add_card_to_action(&queue, Card{
 		"dummy",
-		CardIcon.HEART,
+		CardIcon.ARROW,
 		[dynamic]string{"Rotate left"},
 		false,
 		false,
 	})
 	add_card_to_action(&queue, Card{
 		"dummy",
-		CardIcon.HEART,
+		CardIcon.ARROW,
+		[dynamic]string{"Regenertion", "4HP / 3s"},
+		false,
+		true,
+	})
+	add_card_to_action(&queue, Card{
+		"dummy",
+		CardIcon.ARROW,
+		[dynamic]string{"Regenertion", "4HP / 3s"},
+		false,
+		true,
+	})
+	add_card_to_action(&queue, Card{
+		"dummy",
+		CardIcon.ARROW,
+		[dynamic]string{"Regenertion", "4HP / 3s"},
+		false,
+		false,
+	})
+	add_card_to_action(&queue, Card{
+		"dummy",
+		CardIcon.ARROW,
+		[dynamic]string{"Regenertion", "4HP / 3s"},
+		false,
+		false,
+	})
+	add_card_to_action(&queue, Card{
+		"dummy",
+		CardIcon.ARROW,
+		[dynamic]string{"Regenertion", "4HP / 3s"},
+		false,
+		false,
+	})
+	add_card_to_action(&queue, Card{
+		"dummy",
+		CardIcon.ARROW,
+		[dynamic]string{"Regenertion", "4HP / 3s"},
+		false,
+		false,
+	})
+	add_card_to_action(&queue, Card{
+		"dummy",
+		CardIcon.ARROW,
+		[dynamic]string{"Regenertion", "4HP / 3s"},
+		false,
+		false,
+	})
+	add_card_to_action(&queue, Card{
+		"dummy",
+		CardIcon.ARROW,
 		[dynamic]string{"Regenertion", "4HP / 3s"},
 		false,
 		false,
@@ -121,11 +170,12 @@ update :: proc() {
 		draw_player(&player)
 		draw_queue(&queue)
 
-		rl.DrawTexture(
-			backdrop_texture,
-			0, 0,
-			rl.WHITE,
-		)
+		// TODO: Actually draw backdrop
+		// rl.DrawTexture(
+		// 	backdrop_texture,
+		// 	0, 0,
+		// 	rl.WHITE,
+		// )
 	}
 	rl.EndTextureMode()
 
@@ -137,7 +187,7 @@ update :: proc() {
 
 		rl.DrawText(strings.clone_to_cstring(fmt.tprintf("Player pos: %d; %d", player.grid_pos.x, player.grid_pos.y)), 10, 10, 30, rl.GREEN)
 		rl.DrawFPS(10, 50)
-	}
+ 	}
 
 	rl.EndDrawing()
 

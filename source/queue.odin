@@ -1,8 +1,8 @@
 package game
 
 import "core:log"
-import "core:strings"
 import math "core:math"
+import "core:strings"
 import rl "vendor:raylib"
 
 ACTION_QUEUE_WIDTH :: 65
@@ -11,7 +11,7 @@ ACTION_QUEUE_ORIGIN := rl.Vector2{f32(math.round((VIRTUAL_WIDTH - ACTION_QUEUE_W
 ACTION_QUEUE_GAP :: 1
 
 CARD_WIDTH :: 63
-CARD_HEIGHT :: 20
+CARD_HEIGHT :: 18
 
 Queue :: struct {
 	stack:    [dynamic]Card,
@@ -19,16 +19,21 @@ Queue :: struct {
 }
 
 get_card_rects :: proc(queue: ^Queue) -> []CardRect {
+	has_selected_cards := len(queue.selected) > 0
+
 	all := make([]CardRect, len(queue.stack), context.temp_allocator)
 
 	selected_amount := len(queue.selected)
 
 	offset_y := ACTION_QUEUE_HEIGHT + ACTION_QUEUE_ORIGIN.y - CARD_HEIGHT
 	offset_y -= f32(selected_amount * CARD_HEIGHT + selected_amount * ACTION_QUEUE_GAP)
+	if has_selected_cards {
+ 		offset_y -= CARD_HEIGHT / 1.5
+	}
 
 	for card, i in queue.stack {
 		x := ACTION_QUEUE_ORIGIN.x + (ACTION_QUEUE_WIDTH - CARD_WIDTH) / 2
-		y : = offset_y
+		y := offset_y
 
 		all[i] = {{x, y, CARD_WIDTH, CARD_HEIGHT}, card}
 
@@ -56,20 +61,62 @@ get_selected_card_rects :: proc(queue: ^Queue) -> []CardRect {
 }
 
 draw_card :: proc(rect: rl.Rectangle, card: Card) {
-	color := rl.ORANGE
-	if card.is_selected {
-		color = rl.PINK
+	color := COLOR_DUST_PURPLE
+	icon_color := COLOR_TERRACOTTA
+	if card.is_echo {
+		// TODO: Add echo color or smth idk
+		color = COLOR_ECHO_BG
+		icon_color = COLOR_ECHO_HIGHLIGHT
 	}
 
+	icon_texture := get_icon_texture(card.icon)
 
 	rl.DrawRectangle(i32(rect.x), i32(rect.y), i32(rect.width), i32(rect.height), color)
+	if card.is_echo {
+		// Draw echo borders
+
+		top_left := rl.Vector2{rect.x + 1, rect.y}
+		top_right := rl.Vector2{rect.x + rect.width, rect.y}
+		bottom_left := rl.Vector2{rect.x, rect.y + rect.height - 1}
+		bottom_right := rl.Vector2{rect.x + rect.width, rect.y + rect.height - 1}
+
+		// top line
+		rl.DrawLineEx(top_left, top_right, 1, COLOR_ECHO_FG)
+
+		// left line
+		rl.DrawLineEx(top_left, bottom_left, 1, COLOR_ECHO_FG)
+
+		// bottom line
+		rl.DrawLineEx(bottom_left, bottom_right, 1, COLOR_ECHO_HIGHLIGHT)
+
+		// right line
+		rl.DrawLineEx(top_right, bottom_right, 1, COLOR_ECHO_HIGHLIGHT)
+	}
+
+	rl.DrawTextureEx(
+		icon_texture,
+		{
+			rect.x + rect.width - f32(icon_texture.width) - 2,
+			rect.y + (rect.height - f32(icon_texture.height)) / 2,
+		},
+		0,
+		1,
+		icon_color,
+	)
 
 	text_offset_y := f32(0)
 	for line in card.lines {
 		rl.SetTextureFilter(tiny5_font.texture, rl.TextureFilter.POINT)
-		rl.DrawTextEx(tiny5_font, strings.clone_to_cstring(line), {rect.x + 2, rect.y + text_offset_y}, 9, 0, rl.WHITE)
+		rl.DrawTextEx(
+			tiny5_font,
+			strings.clone_to_cstring(line),
+			{rect.x + 2, rect.y + text_offset_y},
+			9,
+			0,
+			COLOR_CHARTREUSE,
+		)
 
-		text_offset_y += 10
+		text_offset_y += 9
 	}
 }
 
@@ -80,14 +127,32 @@ draw_queue :: proc(queue: ^Queue) {
 		i32(ACTION_QUEUE_ORIGIN.y),
 		ACTION_QUEUE_WIDTH,
 		ACTION_QUEUE_HEIGHT,
-		rl.GRAY,
+		COLOR_TWILIGHT,
 	)
 
 	// Draw selected cards
+	last_card_rect: rl.Rectangle
+	has_selected_cards := false
+
 	for card_rect in get_selected_card_rects(queue) {
 		rect := card_rect.rect
 		card := card_rect.card
 		draw_card(rect, card)
+		last_card_rect = rect
+		has_selected_cards = true
+	}
+
+	if has_selected_cards {
+		text_size := rl.MeasureTextEx(tiny5_font, "Selected cards", 9, 0)
+
+		rl.DrawTextEx(
+			tiny5_font,
+			"Selected cards",
+			{last_card_rect.x + (CARD_WIDTH - text_size.x) / 2, last_card_rect.y - CARD_HEIGHT / 2},
+			9,
+			0,
+			COLOR_CHARTREUSE,
+		)
 	}
 
 	// Draw not selected cards
@@ -96,6 +161,7 @@ draw_queue :: proc(queue: ^Queue) {
 		card := card_rect.card
 		draw_card(rect, card)
 	}
+
 }
 
 handle_card_click :: proc(
