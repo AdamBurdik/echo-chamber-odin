@@ -6,11 +6,11 @@ import "core:strings"
 import rl "vendor:raylib"
 
 ACTION_QUEUE_WIDTH :: 72
-ACTION_QUEUE_HEIGHT :: 198
-ACTION_QUEUE_ORIGIN := rl.Vector2{323, 31}
+ACTION_QUEUE_HEIGHT :: 201
+ACTION_QUEUE_ORIGIN := rl.Vector2{316, 39}
 ACTION_QUEUE_GAP :: 1
 
-CARD_WIDTH :: 72
+CARD_WIDTH :: 69
 CARD_HEIGHT :: 18
 CARD_BOTTOM_MARGIN :: 0 // Offset from bottom of action queue (so its not touching its bottom)
 
@@ -29,7 +29,7 @@ get_card_rects :: proc(queue: ^Queue) -> []CardRect {
 	offset_y := ACTION_QUEUE_HEIGHT + ACTION_QUEUE_ORIGIN.y - CARD_HEIGHT - CARD_BOTTOM_MARGIN
 	offset_y -= f32(selected_amount * CARD_HEIGHT + selected_amount * ACTION_QUEUE_GAP)
 	if has_selected_cards {
-		offset_y -= CARD_HEIGHT / 1.5
+		offset_y -= 12
 	}
 
 	for &card, i in queue.stack {
@@ -110,7 +110,7 @@ draw_card :: proc(rect: rl.Rectangle, card: ^Card) {
 		rl.DrawTextEx(
 			tiny5_font,
 			strings.clone_to_cstring(line),
-			{rect.x + 4, rect.y + text_offset_y},
+			{rect.x + 2, rect.y + text_offset_y},
 			9,
 			0,
 			COLOR_CHARTREUSE,
@@ -131,15 +131,6 @@ draw_card :: proc(rect: rl.Rectangle, card: ^Card) {
 }
 
 draw_queue :: proc(queue: ^Queue) {
-	// Draw background
-	rl.DrawRectangle(
-		i32(ACTION_QUEUE_ORIGIN.x),
-		i32(ACTION_QUEUE_ORIGIN.y),
-		ACTION_QUEUE_WIDTH,
-		ACTION_QUEUE_HEIGHT,
-		COLOR_TWILIGHT,
-	)
-
 	// Draw selected cards
 	last_card_rect: rl.Rectangle
 	has_selected_cards := false
@@ -161,11 +152,11 @@ draw_queue :: proc(queue: ^Queue) {
 			// Rounding cause it sometimes causes wierd font
 			{
 				last_card_rect.x + math.round((CARD_WIDTH - text_size.x) / 2),
-				last_card_rect.y - CARD_HEIGHT / 2,
+				last_card_rect.y - CARD_HEIGHT / 1.65,
 			},
 			9,
 			0,
-			COLOR_CHARTREUSE,
+			COLOR_ROSE,
 		)
 	}
 

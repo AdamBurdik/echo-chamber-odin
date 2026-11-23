@@ -104,6 +104,14 @@ init :: proc() {
 		false,
 		false,
 	})
+	add_card_to_action(&queue, Card{
+		"dummy",
+		CardIcon.ARROW,
+		[dynamic]string{"Regenertion", "4HP / 3s"},
+		false,
+		false,
+		false,
+	})
 
 	player = Player{{0, 0}, CardinalDirection.DOWN, {}, false, {}, 0, 0}
 
@@ -162,17 +170,18 @@ update :: proc() {
 	{
 		rl.ClearBackground({0, 0, 0, 255})
 
-		draw_board(&board, &player)
-		draw_player(&player)
-		draw_queue(&queue)
-		draw_hud()
-
 		// TODO: Actually draw backdrop
+		draw_board(&board, &player)
+
 		rl.DrawTexture(
 			backdrop_texture,
 			0, 0,
 			rl.WHITE,
 		)
+
+		draw_player(&player)
+		draw_queue(&queue)
+		draw_hud()
 	}
 	rl.EndTextureMode()
 
