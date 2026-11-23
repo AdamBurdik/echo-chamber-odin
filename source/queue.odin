@@ -5,13 +5,14 @@ import math "core:math"
 import "core:strings"
 import rl "vendor:raylib"
 
-ACTION_QUEUE_WIDTH :: 65
-ACTION_QUEUE_HEIGHT :: VIRTUAL_HEIGHT - 50
-ACTION_QUEUE_ORIGIN := rl.Vector2{f32(math.round((VIRTUAL_WIDTH - ACTION_QUEUE_WIDTH) / 1.5)), 25}
+ACTION_QUEUE_WIDTH :: 72
+ACTION_QUEUE_HEIGHT :: 198
+ACTION_QUEUE_ORIGIN := rl.Vector2{323, 31}
 ACTION_QUEUE_GAP :: 1
 
-CARD_WIDTH :: 63
+CARD_WIDTH :: 72
 CARD_HEIGHT :: 18
+CARD_BOTTOM_MARGIN :: 0 // Offset from bottom of action queue (so its not touching its bottom)
 
 Queue :: struct {
 	stack:    [dynamic]Card,
@@ -25,17 +26,17 @@ get_card_rects :: proc(queue: ^Queue) -> []CardRect {
 
 	selected_amount := len(queue.selected)
 
-	offset_y := ACTION_QUEUE_HEIGHT + ACTION_QUEUE_ORIGIN.y - CARD_HEIGHT
+	offset_y := ACTION_QUEUE_HEIGHT + ACTION_QUEUE_ORIGIN.y - CARD_HEIGHT - CARD_BOTTOM_MARGIN
 	offset_y -= f32(selected_amount * CARD_HEIGHT + selected_amount * ACTION_QUEUE_GAP)
 	if has_selected_cards {
- 		offset_y -= CARD_HEIGHT / 1.5
+		offset_y -= CARD_HEIGHT / 1.5
 	}
 
-	for card, i in queue.stack {
+	for &card, i in queue.stack {
 		x := ACTION_QUEUE_ORIGIN.x + (ACTION_QUEUE_WIDTH - CARD_WIDTH) / 2
 		y := offset_y
 
-		all[i] = {{x, y, CARD_WIDTH, CARD_HEIGHT}, card}
+		all[i] = {{x, y, CARD_WIDTH, CARD_HEIGHT}, &card}
 
 		offset_y -= CARD_HEIGHT + ACTION_QUEUE_GAP
 	}
@@ -46,13 +47,13 @@ get_card_rects :: proc(queue: ^Queue) -> []CardRect {
 get_selected_card_rects :: proc(queue: ^Queue) -> []CardRect {
 	all := make([]CardRect, len(queue.selected), context.temp_allocator)
 
-	offset_y := ACTION_QUEUE_HEIGHT + ACTION_QUEUE_ORIGIN.y - CARD_HEIGHT
+	offset_y := ACTION_QUEUE_HEIGHT + ACTION_QUEUE_ORIGIN.y - CARD_HEIGHT - CARD_BOTTOM_MARGIN
 
-	for card, i in queue.selected {
+	for &card, i in queue.selected {
 		x := ACTION_QUEUE_ORIGIN.x + (ACTION_QUEUE_WIDTH - CARD_WIDTH) / 2
 		y := offset_y
 
-		all[i] = {rl.Rectangle{x, y, CARD_WIDTH, CARD_HEIGHT}, card}
+		all[i] = {rl.Rectangle{x, y, CARD_WIDTH, CARD_HEIGHT}, &card}
 
 		offset_y -= CARD_HEIGHT + ACTION_QUEUE_GAP
 	}
@@ -60,11 +61,10 @@ get_selected_card_rects :: proc(queue: ^Queue) -> []CardRect {
 	return all
 }
 
-draw_card :: proc(rect: rl.Rectangle, card: Card) {
+draw_card :: proc(rect: rl.Rectangle, card: ^Card) {
 	color := COLOR_DUST_PURPLE
 	icon_color := COLOR_TERRACOTTA
 	if card.is_echo {
-		// TODO: Add echo color or smth idk
 		color = COLOR_ECHO_BG
 		icon_color = COLOR_ECHO_HIGHLIGHT
 	}
@@ -96,7 +96,7 @@ draw_card :: proc(rect: rl.Rectangle, card: Card) {
 	rl.DrawTextureEx(
 		icon_texture,
 		{
-			rect.x + rect.width - f32(icon_texture.width) - 2,
+			rect.x + rect.width - f32(icon_texture.width) - 8,
 			rect.y + (rect.height - f32(icon_texture.height)) / 2,
 		},
 		0,
@@ -106,17 +106,27 @@ draw_card :: proc(rect: rl.Rectangle, card: Card) {
 
 	text_offset_y := f32(0)
 	for line in card.lines {
-		rl.SetTextureFilter(tiny5_font.texture, rl.TextureFilter.POINT)
+		// rl.SetTextureFilter(tiny5_font.texture, rl.TextureFilter.POINT)
 		rl.DrawTextEx(
 			tiny5_font,
 			strings.clone_to_cstring(line),
-			{rect.x + 2, rect.y + text_offset_y},
+			{rect.x + 4, rect.y + text_offset_y},
 			9,
 			0,
 			COLOR_CHARTREUSE,
 		)
 
 		text_offset_y += 9
+	}
+
+	if card.is_hovered {
+		rl.DrawRectangle(
+			i32(rect.x),
+			i32(rect.y),
+			i32(rect.width),
+			i32(rect.height),
+			COLOR_CARD_HOVERED,
+		)
 	}
 }
 
@@ -148,7 +158,11 @@ draw_queue :: proc(queue: ^Queue) {
 		rl.DrawTextEx(
 			tiny5_font,
 			"Selected cards",
-			{last_card_rect.x + (CARD_WIDTH - text_size.x) / 2, last_card_rect.y - CARD_HEIGHT / 2},
+			// Rounding cause it sometimes causes wierd font
+			{
+				last_card_rect.x + math.round((CARD_WIDTH - text_size.x) / 2),
+				last_card_rect.y - CARD_HEIGHT / 2,
+			},
 			9,
 			0,
 			COLOR_CHARTREUSE,
@@ -164,44 +178,64 @@ draw_queue :: proc(queue: ^Queue) {
 
 }
 
-handle_card_click :: proc(
-	queue: ^Queue,
-	i: int,
-	rect: rl.Rectangle,
-	card: ^Card,
-	mouse_x: f32,
-	mouse_y: f32,
-) -> bool {
-	if check_collision(rect, mouse_x, mouse_y) {
-		if card.is_selected {
-			card.is_selected = false
-			ordered_remove(&queue.selected, i)
-			inject_at(&queue.stack, 0, card^)
-		} else {
-			card.is_selected = true
-			ordered_remove(&queue.stack, i)
-			append(&queue.selected, card^)
+handle_card_click :: proc(queue: ^Queue, card: ^Card) {
+	moved := card^
+	moved.is_hovered = false
+
+	if moved.is_selected {
+		moved.is_selected = false
+		for _, i in queue.selected {
+			if &queue.selected[i] == card {
+				ordered_remove(&queue.selected, i)
+				break
+			}
 		}
-		return true
+		inject_at(&queue.stack, 0, moved)
+	} else {
+		moved.is_selected = true
+		for _, i in queue.stack {
+			if &queue.stack[i] == card {
+				ordered_remove(&queue.stack, i)
+				break
+			}
+		}
+		append(&queue.selected, moved)
 	}
-	return false
 }
 
 update_queue :: proc(queue: ^Queue) {
-	if rl.IsMouseButtonReleased(rl.MouseButton.LEFT) {
-		mouse_x := get_mouse_x()
-		mouse_y := get_mouse_y()
+	mouse_x := get_mouse_x()
+	mouse_y := get_mouse_y()
 
-		for card_rect, i in get_selected_card_rects(queue) {
-			rect := card_rect.rect
-			card := card_rect.card
-			if handle_card_click(queue, i, rect, &card, mouse_x, mouse_y) {return}
+	for card_rect in get_selected_card_rects(queue) {
+		rect := card_rect.rect
+		card := card_rect.card
+
+		if check_collision(rect, mouse_x, mouse_y) {
+			card.is_hovered = true
+			log.info("Hovered!")
+			if rl.IsMouseButtonReleased(rl.MouseButton.LEFT) {
+				handle_card_click(queue, card)
+				return
+			}
+		} else {
+			card.is_hovered = false
 		}
+	}
 
-		for card_rect, i in get_card_rects(queue) {
-			rect := card_rect.rect
-			card := card_rect.card
-			if handle_card_click(queue, i, rect, &card, mouse_x, mouse_y) {return}
+	for card_rect in get_card_rects(queue) {
+		rect := card_rect.rect
+		card := card_rect.card
+
+		if check_collision(rect, mouse_x, mouse_y) {
+			log.info("Hovered!")
+			card.is_hovered = true
+			if rl.IsMouseButtonReleased(rl.MouseButton.LEFT) {
+				handle_card_click(queue, card)
+				return
+			}
+		} else {
+			card.is_hovered = false
 		}
 	}
 }

@@ -29,6 +29,9 @@ COLOR_ECHO_BG :: rl.Color{40, 118, 153, 255}
 COLOR_ECHO_FG :: rl.Color{0, 152, 219, 255}
 COLOR_ECHO_HIGHLIGHT :: rl.Color{12, 230, 242, 255}
 
+COLOR_HOVERED :: rl.Color{207, 169, 138, 25}
+COLOR_CARD_HOVERED :: rl.Color{96, 85, 110, 50}
+
 asset_map: map[string][]byte
 
 run: bool

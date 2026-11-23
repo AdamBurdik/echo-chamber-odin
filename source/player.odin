@@ -36,7 +36,7 @@ draw_player :: proc(player: ^Player) {
 		texture,
 		{
 			BOARD_ORIGIN.x + f32(TILE_SIZE - PLAYER_WIDTH) / 2,
-			BOARD_ORIGIN.y + f32(PLAYER_HEIGHT) / 1.5 + player.hop_y,
+			BOARD_ORIGIN.y - f32(PLAYER_HEIGHT) / 3 + player.hop_y,
 		},
 		0,
 		1,

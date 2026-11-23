@@ -28,11 +28,12 @@ Card :: struct {
 	lines:       [dynamic]string,
 	is_selected: bool,
 	is_echo:     bool,
+	is_hovered:  bool,
 }
 
 CardRect :: struct {
 	rect: rl.Rectangle,
-	card: Card,
+	card: ^Card,
 }
 
 get_icon_texture :: proc(icon: CardIcon) -> rl.Texture {

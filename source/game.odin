@@ -38,11 +38,13 @@ init :: proc() {
 		[dynamic]string{"Place trap", "infront"},
 		false,
 		false,
+		false,
 	})
 	add_card_to_action(&queue, Card{
 		"dummy",
 		CardIcon.ARROW,
 		[dynamic]string{"Block 1", "adjent attack"},
+		false,
 		false,
 		false,
 	})
@@ -52,6 +54,7 @@ init :: proc() {
 		[dynamic]string{"Rotate left"},
 		false,
 		false,
+		false,
 	})
 	add_card_to_action(&queue, Card{
 		"dummy",
@@ -59,6 +62,7 @@ init :: proc() {
 		[dynamic]string{"Regenertion", "4HP / 3s"},
 		false,
 		true,
+		false,
 	})
 	add_card_to_action(&queue, Card{
 		"dummy",
@@ -66,12 +70,6 @@ init :: proc() {
 		[dynamic]string{"Regenertion", "4HP / 3s"},
 		false,
 		true,
-	})
-	add_card_to_action(&queue, Card{
-		"dummy",
-		CardIcon.ARROW,
-		[dynamic]string{"Regenertion", "4HP / 3s"},
-		false,
 		false,
 	})
 	add_card_to_action(&queue, Card{
@@ -79,12 +77,6 @@ init :: proc() {
 		CardIcon.ARROW,
 		[dynamic]string{"Regenertion", "4HP / 3s"},
 		false,
-		false,
-	})
-	add_card_to_action(&queue, Card{
-		"dummy",
-		CardIcon.ARROW,
-		[dynamic]string{"Regenertion", "4HP / 3s"},
 		false,
 		false,
 	})
@@ -94,6 +86,7 @@ init :: proc() {
 		[dynamic]string{"Regenertion", "4HP / 3s"},
 		false,
 		false,
+		false,
 	})
 	add_card_to_action(&queue, Card{
 		"dummy",
@@ -101,11 +94,13 @@ init :: proc() {
 		[dynamic]string{"Regenertion", "4HP / 3s"},
 		false,
 		false,
+		false,
 	})
 	add_card_to_action(&queue, Card{
 		"dummy",
 		CardIcon.ARROW,
 		[dynamic]string{"Regenertion", "4HP / 3s"},
+		false,
 		false,
 		false,
 	})
@@ -146,6 +141,7 @@ update :: proc() {
 
 	update_queue(&queue)
 	update_player(dt, &player, &board)
+	update_hud()
 
 	// TODO: Remove
 	if rl.IsKeyReleased(rl.KeyboardKey.W) {
@@ -169,13 +165,14 @@ update :: proc() {
 		draw_board(&board, &player)
 		draw_player(&player)
 		draw_queue(&queue)
+		draw_hud()
 
 		// TODO: Actually draw backdrop
-		// rl.DrawTexture(
-		// 	backdrop_texture,
-		// 	0, 0,
-		// 	rl.WHITE,
-		// )
+		rl.DrawTexture(
+			backdrop_texture,
+			0, 0,
+			rl.WHITE,
+		)
 	}
 	rl.EndTextureMode()
 
