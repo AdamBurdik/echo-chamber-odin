@@ -2,6 +2,7 @@ package game
 
 import "core:log"
 import math "core:math"
+import "core:strconv"
 import "core:strings"
 import rl "vendor:raylib"
 
@@ -98,6 +99,25 @@ draw_card :: proc(rect: rl.Rectangle, card: ^Card) {
 
 		// right line
 		rl.DrawLineEx(top_right, bottom_right, 1, COLOR_ECHO_HIGHLIGHT)
+
+		// Echo cooldown
+		if card.echo_cooldown > 0 {
+			buf: [32]u8
+			s := strconv.write_int(buf[:], i64(card.echo_cooldown), 10)
+			buf[len(s)] = 0
+			cstr := cstring(&buf[0])
+
+			text_size := rl.MeasureTextEx(tiny5_font, cstr, 9, 0)
+
+			rl.DrawTextEx(
+				tiny5_font,
+				cstr,
+				{bottom_right.x - text_size.x - 2, bottom_right.y - text_size.y},
+				9,
+				0,
+				rl.WHITE,
+			)
+		}
 	}
 
 	rl.DrawTextureEx(
@@ -126,7 +146,7 @@ draw_card :: proc(rect: rl.Rectangle, card: ^Card) {
 		text_offset_y += 9
 	}
 
-	if card.is_hovered {
+	if card.is_hovered && !is_simulation_running {
 		rl.DrawRectangle(
 			i32(rect.x),
 			i32(rect.y),

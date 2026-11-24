@@ -20,6 +20,10 @@ process_card :: proc(card: ^Card, player: ^Player, board: ^Board, queue: ^Queue)
 	}
 
 	if card.is_echo {
+        card.echo_cooldown = 3
+        // Reset the stuff, just in case
+        card.is_hovered = false
+        card.is_selected = false
         append(&queue.echo, card^)
 	} else {
 		delete(card.actions)
