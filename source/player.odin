@@ -45,26 +45,23 @@ draw_player :: proc(player: ^Player) {
 }
 
 update_player :: proc(dt: f32, player: ^Player, board: ^Board) {
-	if player.is_jumping {
-		player.jump_t = min(1.0, player.jump_t + dt / PLAYER_JUMP_DURATION)
-		t := player.jump_t
+	if !player.is_jumping { return }
 
-		remaining := 1.0 - ease_in_out_cubic(t)
-		start := player.jump_start_offset
-		board.camera_offset = {f32(start.x) * remaining, f32(start.y) * remaining}
+	player.jump_t = min(1.0, player.jump_t + dt / PLAYER_JUMP_DURATION)
+	t := player.jump_t
 
-		player.hop_y = -math.sin(math.PI * t) * PLAYER_JUMP_HEIGHT
+	remaining := 1.0 - ease_in_out_cubic(t)
+	start := player.jump_start_offset
+	board.camera_offset = {start.x * remaining, start.y * remaining}
 
-		if t >= 1 {
-			player.grid_pos = player.target_grid_pos
+	player.hop_y = -math.sin(math.PI * t) * PLAYER_JUMP_HEIGHT
 
-			player.is_jumping = false
-			board.camera_offset = {0, 0}
-			player.hop_y = 0.0
-			player.jump_t = 0
-			player.jump_start_offset = {0, 0}
-		}
-		return
+	if t >= 1.0 {
+		player.is_jumping = false
+		board.camera_offset = {0, 0}
+		player.hop_y = 0.0
+		player.jump_t = 0.0
+		player.jump_start_offset = {0, 0}
 	}
 }
 
@@ -80,26 +77,28 @@ turn :: proc(player: ^Player, direction: CardinalDirection) {
 }
 
 jump_player :: proc(player: ^Player, direction: CardinalDirection, amount: i32, board: ^Board) {
-	if player.is_jumping {return}
+	if player.is_jumping { return }
 
 	turn(player, direction)
-
 	dir_vector := get_direction_vector(direction)
+
+	old_grid_pos := player.grid_pos
 
 	player.target_grid_pos = Coord {
 		player.grid_pos.x + i32(dir_vector.x) * amount,
 		player.grid_pos.y + i32(dir_vector.y) * amount,
 	}
 
-	player.jump_start_offset = {
-		dir_vector.x * f32(TILE_SIZE * amount),
-		dir_vector.y * f32(TILE_SIZE * amount),
-	}
+	player.grid_pos = player.target_grid_pos
 
-	board.camera_offset = {f32(player.jump_start_offset.x), f32(player.jump_start_offset.y)}
+	dx := f32((player.grid_pos.x - old_grid_pos.x) * TILE_SIZE)
+	dy := f32((player.grid_pos.y - old_grid_pos.y) * TILE_SIZE)
+
+	player.jump_start_offset = {dx, dy}
+	board.camera_offset = player.jump_start_offset
 	player.is_jumping = true
+	player.jump_t = 0.0
 }
-
 rotate_player :: proc(player: ^Player, anti_clockwise: bool) {
 	player.direction = get_rotated_direction(player.direction, anti_clockwise)
 }

@@ -29,6 +29,7 @@ Tile :: struct {
 
 Board :: struct {
 	grid: map[Coord]Tile,
+	enemies: [dynamic]Enemy,
 
 	// Using raylib vector for camera offset, to make it smoother and not jittery
 	camera_offset: rl.Vector2,
@@ -75,16 +76,25 @@ get_tile :: proc(board: ^Board, coord: Coord) -> Tile {
 	// TODO: Do some random generation or smth idk
 	tile = Tile{0}
 	board.grid[coord] = tile
+
+	if random.int32_range(0, 10) <= 1 {
+		append(&board.enemies, Enemy{
+			coord = coord,
+			type = .GOBLIN,
+			health = 100,
+			direction = .DOWN,
+		})
+	}
+
 	return tile
 }
 
 
 draw_board :: proc(board: ^Board, player: ^Player) {
-    render_pos := player.is_jumping ? player.target_grid_pos : player.grid_pos
-
-	surrounding := get_surrounding_coords(render_pos, BOARD_RENDER_DISTANCE)
-    for coord in surrounding {
-        tile := get_tile(board, coord)
+	surrounding := get_surrounding_coords(player.grid_pos, BOARD_RENDER_DISTANCE)
+	
+	for coord in surrounding {
+		tile := get_tile(board, coord)
 		grid_x := coord.x
 		grid_y := coord.y
 
@@ -92,7 +102,5 @@ draw_board :: proc(board: ^Board, player: ^Player) {
 		y := BOARD_ORIGIN.y + f32((grid_y - player.grid_pos.y) * TILE_SIZE) + board.camera_offset.y
 
 		rl.DrawTextureEx(empty_tile_texture, {x, y}, 0, 1, rl.WHITE)
-		// draw_text(x, y, fmt.tprintf("x: %d", grid_x), 18, rl.WHITE)
-		// draw_text(x, y + 4, fmt.tprintf("y: %d", grid_y), 18, rl.WHITE)
-    }
+	}
 }

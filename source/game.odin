@@ -124,6 +124,7 @@ update :: proc() {
 
 		// TODO: Actually draw backdrop
 		draw_board(&board, &player)
+		draw_enemies(&board, &player)
 
 		rl.DrawTexture(backdrop_texture, 0, 0, rl.WHITE)
 
