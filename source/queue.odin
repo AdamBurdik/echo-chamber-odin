@@ -5,14 +5,14 @@ import math "core:math"
 import "core:strings"
 import rl "vendor:raylib"
 
-ACTION_QUEUE_WIDTH :: 72
-ACTION_QUEUE_HEIGHT :: 201
-ACTION_QUEUE_ORIGIN := rl.Vector2{316, 39}
+ACTION_QUEUE_WIDTH :: 71
+ACTION_QUEUE_HEIGHT :: 203
+ACTION_QUEUE_ORIGIN := rl.Vector2{316, 38}
 ACTION_QUEUE_GAP :: 1
 
 CARD_WIDTH :: 69
 CARD_HEIGHT :: 18
-CARD_BOTTOM_MARGIN :: 0 // Offset from bottom of action queue (so its not touching its bottom)
+CARD_BOTTOM_MARGIN :: 1 // Offset from bottom of action queue (so its not touching its bottom)
 
 Queue :: struct {
 	stack:    [dynamic]Card,
@@ -167,6 +167,16 @@ draw_queue :: proc(queue: ^Queue) {
 		draw_card(rect, card)
 	}
 
+	// Overlay rectangle when it should be blocked
+	if is_simulation_running {
+		rl.DrawRectangle(
+			i32(ACTION_QUEUE_ORIGIN.x),
+			i32(ACTION_QUEUE_ORIGIN.y),
+			ACTION_QUEUE_WIDTH,
+			ACTION_QUEUE_HEIGHT,
+			COLOR_BLOCKED_OVERLAY,
+		)
+	}
 }
 
 handle_card_click :: proc(queue: ^Queue, card: ^Card) {

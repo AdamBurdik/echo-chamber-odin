@@ -11,15 +11,7 @@ begin_button_hovering := false
 draw_hud :: proc() {
 	// Draw begin button
 	begin_button_x := ACTION_QUEUE_ORIGIN.x + 8
-	begin_button_y := ACTION_QUEUE_ORIGIN.y + ACTION_QUEUE_HEIGHT + 2
-
-	// rl.DrawRectangle(
-	// 	i32(begin_button_x),
-	// 	i32(begin_button_y),
-	// 	BEGIN_BUTTON_WIDTH,
-	// 	BEGIN_BUTTON_HEIGHT,
-	// 	rl.RED,
-	// )
+	begin_button_y := ACTION_QUEUE_ORIGIN.y + ACTION_QUEUE_HEIGHT + 1
 
 	text_size := rl.MeasureTextEx(tiny5_font, "<< BEGIN RUN >>", 18, 0)
 
@@ -40,6 +32,17 @@ draw_hud :: proc() {
 		0,
 		text_color,
 	)
+
+	// Overlay rectangle when it should be blocked
+	if is_simulation_running {
+		rl.DrawRectangle(
+			i32(begin_button_x),
+			i32(begin_button_y),
+			BEGIN_BUTTON_WIDTH,
+			BEGIN_BUTTON_HEIGHT,
+			COLOR_BLOCKED_OVERLAY,
+		)
+	}
 }
 
 update_hud :: proc(queue: ^Queue) {
@@ -49,10 +52,11 @@ update_hud :: proc(queue: ^Queue) {
 	begin_button_x := ACTION_QUEUE_ORIGIN.x
 	begin_button_y := ACTION_QUEUE_ORIGIN.y + ACTION_QUEUE_HEIGHT + 4
 
-	if rl.CheckCollisionPointRec(
-		{mouse_x, mouse_y},
-		{begin_button_x, begin_button_y, BEGIN_BUTTON_WIDTH, BEGIN_BUTTON_HEIGHT},
-	) {
+	if !is_simulation_running &&
+	   rl.CheckCollisionPointRec(
+		   {mouse_x, mouse_y},
+		   {begin_button_x, begin_button_y, BEGIN_BUTTON_WIDTH, BEGIN_BUTTON_HEIGHT},
+	   ) {
 		begin_button_hovering = true
 
 		if rl.IsMouseButtonReleased(rl.MouseButton.LEFT) {

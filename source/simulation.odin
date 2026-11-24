@@ -26,6 +26,7 @@ process_card :: proc(card: ^Card, player: ^Player, board: ^Board) {
 tick_simulation :: proc(queue: ^Queue, player: ^Player, board: ^Board) {
     if len(queue.selected) < 1 {
         is_simulation_running = false
+        simulation_cooldown = 0
         return
     }
     
