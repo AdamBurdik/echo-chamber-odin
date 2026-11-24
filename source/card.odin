@@ -13,19 +13,41 @@ CardIcon :: enum {
 	SWORD,
 }
 
-CardAction :: enum {
+CardActionType :: enum {
 	MOVE,
 	ROTATE,
+	INSTANT_HEAL,
+	REGEN,
 }
 
-CardActionValue :: struct {
-	type: CardAction,
+ActionMove :: struct {
+	distance: i32,
+}
+
+ActionInstantHeal :: struct {
+	amount: i32,
+}
+
+ActionRegen :: struct {
+	amount:  i32,
+	seconds: i32,
+}
+
+ActionRotate :: struct {
+	anti_clockwise: bool,
+}
+
+CardAction :: union {
+	ActionMove,
+	ActionInstantHeal,
+	ActionRegen,
+	ActionRotate,
 }
 
 Card :: struct {
-	type:        string,
 	icon:        CardIcon,
 	lines:       [dynamic]string,
+	actions:     [dynamic]CardAction,
 	is_selected: bool,
 	is_echo:     bool,
 	is_hovered:  bool,

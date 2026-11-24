@@ -99,3 +99,7 @@ jump_player :: proc(player: ^Player, direction: CardinalDirection, amount: i32, 
 	board.camera_offset = {f32(player.jump_start_offset.x), f32(player.jump_start_offset.y)}
 	player.is_jumping = true
 }
+
+rotate_player :: proc(player: ^Player, anti_clockwise: bool) {
+	player.direction = get_rotated_direction(player.direction, anti_clockwise)
+}

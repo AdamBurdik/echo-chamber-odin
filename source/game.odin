@@ -3,10 +3,9 @@
 package game
 
 import "core:c"
-import "core:strings"
 import "core:fmt"
+import "core:strings"
 import rl "vendor:raylib"
-
 
 
 // Global generic contants
@@ -17,7 +16,6 @@ VIRTUAL_WIDTH :: 480
 VIRTUAL_HEIGHT :: 270
 
 TILE_SIZE :: i32(16)
-
 
 
 // Later initialized stuff
@@ -32,87 +30,40 @@ init :: proc() {
 	// Initialize systems and other stuff
 	board = create_board()
 	queue = {}
-	add_card_to_action(&queue, Card{
-		"dummy",
-		CardIcon.HEART,
-		[dynamic]string{"Place trap", "infront"},
-		false,
-		false,
-		false,
-	})
-	add_card_to_action(&queue, Card{
-		"dummy",
-		CardIcon.ARROW,
-		[dynamic]string{"Block 1", "adjent attack"},
-		false,
-		false,
-		false,
-	})
-	add_card_to_action(&queue, Card{
-		"dummy",
-		CardIcon.ARROW,
-		[dynamic]string{"Rotate left"},
-		false,
-		false,
-		false,
-	})
-	add_card_to_action(&queue, Card{
-		"dummy",
-		CardIcon.ARROW,
-		[dynamic]string{"Regenertion", "4HP / 3s"},
-		false,
-		true,
-		false,
-	})
-	add_card_to_action(&queue, Card{
-		"dummy",
-		CardIcon.ARROW,
-		[dynamic]string{"Regenertion", "4HP / 3s"},
-		false,
-		true,
-		false,
-	})
-	add_card_to_action(&queue, Card{
-		"dummy",
-		CardIcon.ARROW,
-		[dynamic]string{"Regenertion", "4HP / 3s"},
-		false,
-		false,
-		false,
-	})
-	add_card_to_action(&queue, Card{
-		"dummy",
-		CardIcon.ARROW,
-		[dynamic]string{"Regenertion", "4HP / 3s"},
-		false,
-		false,
-		false,
-	})
-	add_card_to_action(&queue, Card{
-		"dummy",
-		CardIcon.ARROW,
-		[dynamic]string{"Regenertion", "4HP / 3s"},
-		false,
-		false,
-		false,
-	})
-	add_card_to_action(&queue, Card{
-		"dummy",
-		CardIcon.ARROW,
-		[dynamic]string{"Regenertion", "4HP / 3s"},
-		false,
-		false,
-		false,
-	})
-	add_card_to_action(&queue, Card{
-		"dummy",
-		CardIcon.ARROW,
-		[dynamic]string{"Regenertion", "4HP / 3s"},
-		false,
-		false,
-		false,
-	})
 
+	add_card_to_action(
+		&queue,
+		Card {
+			icon = .ARROW,
+			lines = [dynamic]string{"Move 1 tile", "forward"},
+			actions = {ActionMove{distance = 1}},
+			is_selected = false,
+			is_echo = false,
+			is_hovered = false,
+		},
+	)
+	add_card_to_action(
+		&queue,
+		Card {
+			icon = .HEART,
+			lines = [dynamic]string{"Instant heal", "25HP"},
+			actions = {ActionInstantHeal{amount = 25}},
+			is_selected = false,
+			is_echo = false,
+			is_hovered = false,
+		},
+	)
+		add_card_to_action(
+		&queue,
+		Card {
+			icon = .CLOCKWISE,
+			lines = [dynamic]string{"Rotate right"},
+			actions = {ActionRotate{anti_clockwise=false}},
+			is_selected = false,
+			is_echo = false,
+			is_hovered = false,
+		},
+	)
 	player = Player{{0, 0}, CardinalDirection.DOWN, {}, false, {}, 0, 0}
 
 
@@ -149,7 +100,7 @@ update :: proc() {
 
 	update_queue(&queue)
 	update_player(dt, &player, &board)
-	update_hud()
+	update_hud(&queue, &player, &board)
 
 	// TODO: Remove
 	if rl.IsKeyReleased(rl.KeyboardKey.W) {
@@ -173,11 +124,7 @@ update :: proc() {
 		// TODO: Actually draw backdrop
 		draw_board(&board, &player)
 
-		rl.DrawTexture(
-			backdrop_texture,
-			0, 0,
-			rl.WHITE,
-		)
+		rl.DrawTexture(backdrop_texture, 0, 0, rl.WHITE)
 
 		draw_player(&player)
 		draw_queue(&queue)
@@ -191,9 +138,17 @@ update :: proc() {
 		rl.ClearBackground({0, 0, 0, 255})
 		rl.DrawTexturePro(virtual_texture.texture, sourceRec, destRec, origin, 0, rl.WHITE)
 
-		rl.DrawText(strings.clone_to_cstring(fmt.tprintf("Player pos: %d; %d", player.grid_pos.x, player.grid_pos.y)), 10, 10, 30, rl.GREEN)
+		rl.DrawText(
+			strings.clone_to_cstring(
+				fmt.tprintf("Player pos: %d; %d", player.grid_pos.x, player.grid_pos.y),
+			),
+			10,
+			10,
+			30,
+			rl.GREEN,
+		)
 		rl.DrawFPS(10, 50)
- 	}
+	}
 
 	rl.EndDrawing()
 
