@@ -29,7 +29,7 @@ init :: proc() {
 
 	// Initialize systems and other stuff
 	board = create_board()
-	queue = {}
+	queue = Queue{}
 
 	add_card_to_action(
 		&queue,
@@ -38,7 +38,7 @@ init :: proc() {
 			lines = [dynamic]string{"Move 1 tile", "forward"},
 			actions = {ActionMove{distance = 1}},
 			is_selected = false,
-			is_echo = false,
+			is_echo = true,
 			is_hovered = false,
 		},
 	)
@@ -49,7 +49,7 @@ init :: proc() {
 			lines = [dynamic]string{"Instant heal", "25HP"},
 			actions = {ActionInstantHeal{amount = 25}},
 			is_selected = false,
-			is_echo = false,
+			is_echo = true,
 			is_hovered = false,
 		},
 	)

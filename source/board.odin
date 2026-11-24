@@ -1,10 +1,10 @@
 package game
 
+import "core:fmt"
 import "core:log"
 import random "core:math/rand"
-import rl "vendor:raylib"
-import "core:fmt"
 import "core:strings"
+import rl "vendor:raylib"
 
 BOARD_GRID_WIDTH :: 21
 BOARD_GRID_HEIGHT :: 21
@@ -28,8 +28,8 @@ Tile :: struct {
 }
 
 Board :: struct {
-	grid: map[Coord]Tile,
-	enemies: [dynamic]Enemy,
+	grid:          map[Coord]Tile,
+	enemies:       [dynamic]Enemy,
 
 	// Using raylib vector for camera offset, to make it smoother and not jittery
 	camera_offset: rl.Vector2,
@@ -77,14 +77,21 @@ get_tile :: proc(board: ^Board, coord: Coord) -> Tile {
 	tile = Tile{0}
 	board.grid[coord] = tile
 
-	if random.int32_range(0, 10) <= 1 {
-		append(&board.enemies, Enemy{
-			coord = coord,
-			type = .GOBLIN,
-			health = 100,
-			direction = .DOWN,
-		})
+	random := random.int32_range(0, 10)
+	type := EnemyType.GOBLIN
+
+	if random <= 1 {
+		type = .GOBLIN
+	} else if (random <= 2) {
+		type = .SLIME_FULL
+	} else if (random <= 3) {
+		type = .CULTIST
 	}
+
+	if (random <= 3) {
+		append(&board.enemies, Enemy{coord = coord, type = type, health = 100, direction = .DOWN})
+	}
+
 
 	return tile
 }
@@ -92,7 +99,7 @@ get_tile :: proc(board: ^Board, coord: Coord) -> Tile {
 
 draw_board :: proc(board: ^Board, player: ^Player) {
 	surrounding := get_surrounding_coords(player.grid_pos, BOARD_RENDER_DISTANCE)
-	
+
 	for coord in surrounding {
 		tile := get_tile(board, coord)
 		grid_x := coord.x

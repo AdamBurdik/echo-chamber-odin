@@ -45,12 +45,13 @@ CardAction :: union {
 }
 
 Card :: struct {
-	icon:        CardIcon,
-	lines:       [dynamic]string,
-	actions:     [dynamic]CardAction,
-	is_selected: bool,
-	is_echo:     bool,
-	is_hovered:  bool,
+	icon:          CardIcon,
+	lines:         [dynamic]string,
+	actions:       [dynamic]CardAction,
+	is_selected:   bool,
+	is_echo:       bool,
+	is_hovered:    bool,
+	echo_cooldown: i32,
 }
 
 CardRect :: struct {

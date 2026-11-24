@@ -17,22 +17,29 @@ CARD_BOTTOM_MARGIN :: 1 // Offset from bottom of action queue (so its not touchi
 Queue :: struct {
 	stack:    [dynamic]Card,
 	selected: [dynamic]Card,
+	echo:     [dynamic]Card,
 }
 
-get_card_rects :: proc(queue: ^Queue) -> []CardRect {
+get_card_rects :: proc(
+	queue: ^Queue,
+	working: [dynamic]Card,
+	ignore_selected: bool = false,
+) -> []CardRect {
 	has_selected_cards := len(queue.selected) > 0
 
-	all := make([]CardRect, len(queue.stack), context.temp_allocator)
+	all := make([]CardRect, len(working), context.temp_allocator)
 
 	selected_amount := len(queue.selected)
 
 	offset_y := ACTION_QUEUE_HEIGHT + ACTION_QUEUE_ORIGIN.y - CARD_HEIGHT - CARD_BOTTOM_MARGIN
-	offset_y -= f32(selected_amount * CARD_HEIGHT + selected_amount * ACTION_QUEUE_GAP)
-	if has_selected_cards {
-		offset_y -= 12
+	if !ignore_selected {
+		offset_y -= f32(selected_amount * CARD_HEIGHT + selected_amount * ACTION_QUEUE_GAP)
+		if has_selected_cards {
+			offset_y -= 12
+		}
 	}
 
-	for &card, i in queue.stack {
+	for &card, i in working {
 		x := ACTION_QUEUE_ORIGIN.x + (ACTION_QUEUE_WIDTH - CARD_WIDTH) / 2
 		y := offset_y
 
@@ -161,7 +168,7 @@ draw_queue :: proc(queue: ^Queue) {
 	}
 
 	// Draw not selected cards
-	for card_rect in get_card_rects(queue) {
+	for card_rect in get_card_rects(queue, queue.stack) {
 		rect := card_rect.rect
 		card := card_rect.card
 		draw_card(rect, card)
@@ -176,6 +183,14 @@ draw_queue :: proc(queue: ^Queue) {
 			ACTION_QUEUE_HEIGHT,
 			COLOR_BLOCKED_OVERLAY,
 		)
+	}
+
+	// Draw echo queue
+	for card_rect in get_card_rects(queue, queue.echo, true) {
+		rect := card_rect.rect
+		rect.x += 82
+		card := card_rect.card
+		draw_card(rect, card)
 	}
 }
 
@@ -223,7 +238,7 @@ update_queue :: proc(queue: ^Queue) {
 		}
 	}
 
-	for card_rect in get_card_rects(queue) {
+	for card_rect in get_card_rects(queue, queue.stack) {
 		rect := card_rect.rect
 		card := card_rect.card
 

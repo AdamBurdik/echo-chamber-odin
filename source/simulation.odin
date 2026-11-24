@@ -5,7 +5,7 @@ import "core:log"
 is_simulation_running := false
 simulation_cooldown := f32(0)
 
-process_card :: proc(card: ^Card, player: ^Player, board: ^Board) {
+process_card :: proc(card: ^Card, player: ^Player, board: ^Board, queue: ^Queue) {
 	for action in card.actions {
 		switch act in action {
 		case ActionMove:
@@ -15,36 +15,40 @@ process_card :: proc(card: ^Card, player: ^Player, board: ^Board) {
 		case ActionRegen:
 
 		case ActionRotate:
-            rotate_player(player, act.anti_clockwise)
+			rotate_player(player, act.anti_clockwise)
 		}
 	}
 
-	delete(card.actions)
-	delete(card.lines)
+	if card.is_echo {
+        append(&queue.echo, card^)
+	} else {
+		delete(card.actions)
+		delete(card.lines)
+	}
 }
 
 tick_simulation :: proc(queue: ^Queue, player: ^Player, board: ^Board) {
-    if len(queue.selected) < 1 {
-        is_simulation_running = false
-        simulation_cooldown = 0
-        return
-    }
-    
-    card := pop_front(&queue.selected)
-	process_card(&card, player, board)
+	if len(queue.selected) < 1 {
+		is_simulation_running = false
+		simulation_cooldown = 0
+		return
+	}
+
+	card := pop_front(&queue.selected)
+	process_card(&card, player, board, queue)
 }
 
 update_simulation :: proc(dt: f32, queue: ^Queue, player: ^Player, board: ^Board) {
-    if !is_simulation_running {
-        return
-    }
+	if !is_simulation_running {
+		return
+	}
 
-    simulation_cooldown -= dt
-    
-    if simulation_cooldown <= 0 {
-        tick_simulation(queue, player, board)
-        simulation_cooldown += 1.0 // 1 second
-    }
+	simulation_cooldown -= dt
+
+	if simulation_cooldown <= 0 {
+		tick_simulation(queue, player, board)
+		simulation_cooldown += 1.0 // 1 second
+	}
 }
 
 run_simulation :: proc(queue: ^Queue) {
@@ -52,5 +56,5 @@ run_simulation :: proc(queue: ^Queue) {
 		return
 	}
 
-    is_simulation_running = true
+	is_simulation_running = true
 }
