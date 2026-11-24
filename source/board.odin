@@ -5,6 +5,7 @@ import "core:log"
 import random "core:math/rand"
 import "core:strings"
 import rl "vendor:raylib"
+import "core:container/queue"
 
 BOARD_GRID_WIDTH :: 21
 BOARD_GRID_HEIGHT :: 21
@@ -77,7 +78,7 @@ get_tile :: proc(board: ^Board, coord: Coord) -> Tile {
 	tile = Tile{0}
 	board.grid[coord] = tile
 
-	random := random.int32_range(0, 10)
+	random := random.int32_range(0, 20)
 	type := EnemyType.GOBLIN
 
 	if random <= 1 {
@@ -110,4 +111,8 @@ draw_board :: proc(board: ^Board, player: ^Player) {
 
 		rl.DrawTextureEx(empty_tile_texture, {x, y}, 0, 1, rl.WHITE)
 	}
+}
+
+get_path_to_player :: proc(board: ^Board, start: Coord, player: ^Player) -> [dynamic]Coord {
+	return search_path(board, start, player.grid_pos)
 }
