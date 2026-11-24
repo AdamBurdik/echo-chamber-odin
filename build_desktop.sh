@@ -4,7 +4,7 @@ OUT_DIR="build/desktop"
 mkdir -p $OUT_DIR
 odin build source/main_desktop \
 	-strict-style \
-	-out:$OUT_DIR/echo_chamber.bin \
+	-out:$OUT_DIR/echo_chamber \
 	-extra-linker-flags:"-L$HOME/.local/lib" \
 	-debug
 

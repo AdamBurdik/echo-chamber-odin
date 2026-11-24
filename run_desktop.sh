@@ -1,2 +1,2 @@
 ./build_desktop.sh
-./build/desktop/echo_chamber.bin
+./build/desktop/echo_chamber
