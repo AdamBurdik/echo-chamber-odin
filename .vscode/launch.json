@@ -5,7 +5,7 @@
             "name": "Debug Echo Chamber",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/build/desktop/echo_chamber.bin", 
+            "program": "${workspaceFolder}/build/desktop/echo_chamber", 
             "cwd": "${workspaceFolder}",
             "stopOnEntry": false,
             "preLaunchTask": "build game"
