@@ -1,7 +1,5 @@
 package game
 
-import "core:log"
-
 is_simulation_running := false
 simulation_cooldown := f32(0)
 
@@ -39,9 +37,7 @@ tick_goblin_enemy :: proc(enemy: ^Enemy, board: ^Board, player: ^Player) {
     }
 
     next_step := path[0]
-    
-    // TODO: Implement enemy jumping or smth idk
-    enemy.coord = next_step
+	jump_enemy(enemy, get_direction_between(enemy.coord, next_step), 1, board)
 }
 
 tick_enemies :: proc(board: ^Board, player: ^Player) {

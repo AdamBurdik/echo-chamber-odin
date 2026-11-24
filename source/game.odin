@@ -102,6 +102,7 @@ update :: proc() {
 	update_player(dt, &player, &board)
 	update_hud(&queue)
 	update_simulation(dt, &queue, &player, &board)
+	update_enemies(dt, &board)
 
 	// TODO: Remove
 	if rl.IsKeyReleased(rl.KeyboardKey.W) {

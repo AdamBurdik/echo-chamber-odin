@@ -2,6 +2,7 @@ package game
 
 import math "core:math"
 import rl "vendor:raylib"
+import "core:log"
 
 CardinalDirection :: enum {
 	UP,
@@ -80,4 +81,18 @@ ease_in_out_cubic :: proc(t: f32) -> f32 {
 		return 4 * t * t * t
 	}
 	return 1 - math.pow(-2 * t + 2, 3) / 2
+}
+
+get_direction_between :: proc(from, to: Coord) -> CardinalDirection {
+	delta_x := to.x - from.x
+	delta_y := to.y - from.y
+
+	for direction in CardinalDirection {
+		vec := get_direction_vector(direction)
+		if i32(vec.x) == delta_x && i32(vec.y) == delta_y {
+			return direction
+		}
+	}
+
+	log.panicf("Coords are not adjacent: from=%v to=%v", from, to)
 }
