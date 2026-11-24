@@ -42,7 +42,7 @@ draw_hud :: proc() {
 	)
 }
 
-update_hud :: proc(queue: ^Queue, player: ^Player, board: ^Board) {
+update_hud :: proc(queue: ^Queue) {
 	mouse_x := get_mouse_x()
 	mouse_y := get_mouse_y()
 
@@ -56,7 +56,7 @@ update_hud :: proc(queue: ^Queue, player: ^Player, board: ^Board) {
 		begin_button_hovering = true
 
 		if rl.IsMouseButtonReleased(rl.MouseButton.LEFT) {
-			run_simulation(queue, player, board)
+			run_simulation(queue)
 		}
 	} else {
 		begin_button_hovering = false

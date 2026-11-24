@@ -204,7 +204,6 @@ update_queue :: proc(queue: ^Queue) {
 
 		if check_collision(rect, mouse_x, mouse_y) {
 			card.is_hovered = true
-			log.info("Hovered!")
 			if rl.IsMouseButtonReleased(rl.MouseButton.LEFT) {
 				handle_card_click(queue, card)
 				return
@@ -219,7 +218,6 @@ update_queue :: proc(queue: ^Queue) {
 		card := card_rect.card
 
 		if check_collision(rect, mouse_x, mouse_y) {
-			log.info("Hovered!")
 			card.is_hovered = true
 			if rl.IsMouseButtonReleased(rl.MouseButton.LEFT) {
 				handle_card_click(queue, card)
