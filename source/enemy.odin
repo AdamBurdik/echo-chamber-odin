@@ -36,8 +36,15 @@ get_enemy_texture :: proc(type: EnemyType, direction: CardinalDirection) -> rl.T
 draw_enemy :: proc(enemy: ^Enemy, player: ^Player, board: ^Board) {
 	texture := get_enemy_texture(enemy.type, enemy.direction)
 
-	x := BOARD_ORIGIN.x + f32((enemy.coord.x - player.grid_pos.x) * TILE_SIZE) + board.camera_offset.x
-	y := BOARD_ORIGIN.y + f32((enemy.coord.y - player.grid_pos.y) * TILE_SIZE) + board.camera_offset.y
+	x :=
+		BOARD_ORIGIN.x +
+		f32((enemy.coord.x - player.grid_pos.x) * TILE_SIZE) +
+		board.camera_offset.x +
+        f32((TILE_SIZE - texture.width) / 2)
+	y :=
+		BOARD_ORIGIN.y +
+		f32((enemy.coord.y - player.grid_pos.y) * TILE_SIZE) +
+		board.camera_offset.y
 
 	rl.DrawTextureEx(texture, {x, y}, 0, 1, rl.WHITE)
 }
