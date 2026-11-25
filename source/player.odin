@@ -1,7 +1,5 @@
 package game
 
-import "core:flags/example"
-import "core:log"
 import math "core:math"
 import rl "vendor:raylib"
 
