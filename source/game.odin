@@ -64,7 +64,7 @@ init :: proc() {
 			is_hovered = false,
 		},
 	)
-	player = Player{{0, 0}, CardinalDirection.DOWN, {}, false, {}, 0, 0}
+	player = Player{{0, 0}, CardinalDirection.DOWN, {}, false, {}, 0, 0, false, 0}
 
 
 	run = true
@@ -116,6 +116,9 @@ update :: proc() {
 	}
 	if rl.IsKeyReleased(rl.KeyboardKey.D) {
 		jump_player(&player, CardinalDirection.RIGHT, 1, &board)
+	}
+	if rl.IsKeyReleased(rl.KeyboardKey.SPACE) {
+		slash_player(&player)
 	}
 
 	// -- Virtual Drawing --

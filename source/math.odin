@@ -1,8 +1,8 @@
 package game
 
+import "core:log"
 import math "core:math"
 import rl "vendor:raylib"
-import "core:log"
 
 CardinalDirection :: enum {
 	UP,
@@ -22,7 +22,21 @@ get_direction_vector :: proc(direction: CardinalDirection) -> rl.Vector2 {
 	case CardinalDirection.RIGHT:
 		return {1, 0}
 	}
-	return {0, 0}
+	panic("unhandled CardinalDirection rotated case")
+}
+
+get_direction_rotation :: proc(direction: CardinalDirection) -> f32 {
+	switch (direction) {
+	case CardinalDirection.UP:
+		return 0
+	case CardinalDirection.DOWN:
+		return 180
+	case CardinalDirection.LEFT:
+		return 270
+	case CardinalDirection.RIGHT:
+		return 90
+	}
+	panic("unhandled CardinalDirection rotated case")
 }
 
 get_rotated_direction :: proc(
@@ -95,4 +109,9 @@ get_direction_between :: proc(from, to: Coord) -> CardinalDirection {
 	}
 
 	log.panicf("Coords are not adjacent: from=%v to=%v", from, to)
+}
+
+// Converts value from 0 to 1 to specified range
+map_range :: proc(t: f32, min: f32, max: f32) -> f32 {
+	return min + (t) * (max - min)
 }

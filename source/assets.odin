@@ -20,6 +20,7 @@ ASSETS_SUMMON_CULTIST := #load_directory("../assets/cultist/summon")
 ASSETS_FULL_IDLE_SLIME := #load_directory("../assets/slime/full/idle")
 ASSETS_HALF_IDLE_SLIME := #load_directory("../assets/slime/full/idle")
 ASSETS_QUARTER_IDLE_SLIME := #load_directory("../assets/slime/full/idle")
+ASSETS_EFFECTS_SLASH := #load_directory("../assets/effects/slash")
 
 // Color pallete
 COLOR_VOID :: rl.Color{13, 12, 21, 255}
@@ -71,12 +72,20 @@ slime_full: DirectionalEntity
 slime_half: DirectionalEntity
 slime_quarter: DirectionalEntity
 
+// Effects
+slash_effect: AnimationFrames
+
 
 DirectionalEntity :: struct {
 	front: rl.Texture,
 	back:  rl.Texture,
 	left:  rl.Texture,
 	right: rl.Texture,
+}
+
+AnimationFrames :: struct {
+	frames: [dynamic]rl.Texture,
+	frame_count: i32,
 }
 
 get_texture_from_directional_entity :: proc(
@@ -115,6 +124,7 @@ init_assets :: proc() {
 	add_assets("slime_full_idle", ASSETS_FULL_IDLE_SLIME)
 	add_assets("slime_half_idle", ASSETS_HALF_IDLE_SLIME)
 	add_assets("slime_quarter_idle", ASSETS_QUARTER_IDLE_SLIME)
+	add_assets("effects_slash", ASSETS_EFFECTS_SLASH)
 }
 
 load_assets :: proc() {
@@ -147,6 +157,7 @@ load_assets :: proc() {
 	slime_half = load_directional_entity("slime_half_idle")
 	slime_quarter = load_directional_entity("slime_quarter_idle")
 
+	slash_effect = load_frames("effects_slash")
 }
 
 // load_texture :: proc(bytes: []u8) -> rl.Texture {
@@ -176,6 +187,31 @@ load_directional_entity :: proc(name: string) -> DirectionalEntity {
 load_font :: proc(name: string, font_size: i32) -> rl.Font {
 	data := get_asset_data(name)
 	return rl.LoadFontFromMemory(".ttf", raw_data(data), i32(len(data)), font_size, nil, 0)
+}
+
+load_frames :: proc(name: string) -> AnimationFrames {
+	frames := make([dynamic]rl.Texture)
+
+	for i := 0; i < 16; i += 1 {
+		data, exists := asset_map[fmt.tprintf("%s/%d.png", name, i)]
+		if !exists {
+			break
+		}
+
+		img := rl.LoadImageFromMemory(".png", raw_data(data), i32(len(data)))
+		tex := rl.LoadTextureFromImage(img)
+		log.infof("frame %d: tex.id=%d len=%d ptr=%p", i, tex.id, len(data), raw_data(data))
+		append(&frames, tex)
+		rl.UnloadImage(img)
+	}
+
+	count := i32(len(frames))
+	log.infof("Loaded animation %d frames for %s", count, name)
+
+	return {
+		frames,
+		count,
+	}
 }
 
 get_asset_data :: proc(name: string) -> []u8 {
