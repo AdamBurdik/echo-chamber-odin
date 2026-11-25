@@ -53,17 +53,29 @@ init :: proc() {
 			is_hovered = false,
 		},
 	)
-		add_card_to_action(
+	add_card_to_action(
 		&queue,
 		Card {
 			icon = .CLOCKWISE,
 			lines = [dynamic]string{"Rotate right"},
-			actions = {ActionRotate{anti_clockwise=false}},
+			actions = {ActionRotate{anti_clockwise = false}},
 			is_selected = false,
 			is_echo = false,
 			is_hovered = false,
 		},
 	)
+	add_card_to_action(
+		&queue,
+		Card {
+			icon = .SWORD,
+			lines = [dynamic]string{"Attack forward", "30HP"},
+			actions = {ActionSlash{amount = 30}},
+			is_selected = false,
+			is_echo = false,
+			is_hovered = false,
+		},
+	)
+
 	player = Player{{0, 0}, CardinalDirection.DOWN, {}, false, {}, 0, 0, false, 0}
 
 
@@ -118,7 +130,7 @@ update :: proc() {
 		jump_player(&player, CardinalDirection.RIGHT, 1, &board)
 	}
 	if rl.IsKeyReleased(rl.KeyboardKey.SPACE) {
-		slash_player(&player)
+		slash_player(&player, &board, 50)
 	}
 
 	// -- Virtual Drawing --

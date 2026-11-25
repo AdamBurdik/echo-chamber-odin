@@ -14,6 +14,9 @@ process_card :: proc(card: ^Card, player: ^Player, board: ^Board, queue: ^Queue)
 
 		case ActionRotate:
 			rotate_player(player, act.anti_clockwise)
+
+		case ActionSlash:
+			slash_player(player, board, act.amount)
 		}
 	}
 
@@ -30,13 +33,13 @@ process_card :: proc(card: ^Card, player: ^Player, board: ^Board, queue: ^Queue)
 }
 
 tick_goblin_enemy :: proc(enemy: ^Enemy, board: ^Board, player: ^Player) {
-    path := get_path_to_player(board,  enemy.coord, player)
-    if len(path) < 1 {
-        // This means the enemy is standing on a player, which should not be possible....
-        return
-    }
+	path := get_path_to_player(board, enemy.coord, player)
+	if len(path) < 1 {
+		// This means the enemy is standing on a player, which should not be possible....
+		return
+	}
 
-    next_step := path[0]
+	next_step := path[0]
 	jump_enemy(enemy, get_direction_between(enemy.coord, next_step), 1, board)
 }
 
@@ -64,7 +67,7 @@ tick_simulation :: proc(queue: ^Queue, player: ^Player, board: ^Board) {
 	card := pop_front(&queue.selected)
 	process_card(&card, player, board, queue)
 
-    tick_enemies(board, player)
+	tick_enemies(board, player)
 }
 
 update_simulation :: proc(dt: f32, queue: ^Queue, player: ^Player, board: ^Board) {

@@ -26,6 +26,7 @@ Enemy :: struct {
 	jump_offset:       rl.Vector2,
 	jump_t:            f32,
 	hop_y:             f32,
+	is_dead:           bool,
 }
 
 get_enemy_texture :: proc(type: EnemyType, direction: CardinalDirection) -> rl.Texture {
@@ -93,6 +94,12 @@ update_enemy :: proc(dt: f32, enemy: ^Enemy) {
 }
 
 update_enemies :: proc(dt: f32, board: ^Board) {
+	for i := len(board.enemies) - 1; i >= 0; i -= 1 {
+		if board.enemies[i].is_dead {
+			ordered_remove(&board.enemies, i)
+		}
+	}
+
 	for &enemy in board.enemies {
 		update_enemy(dt, &enemy)
 	}
@@ -118,4 +125,15 @@ jump_enemy :: proc(enemy: ^Enemy, direction: CardinalDirection, amount: i32, boa
 	enemy.jump_offset = enemy.jump_start_offset
 	enemy.is_jumping = true
 	enemy.jump_t = 0.0
+}
+
+damage_enemy :: proc(enemy: ^Enemy, damage: i32) {
+	enemy.health -= damage
+
+	if (enemy.health <= 0) {
+		enemy.is_dead = true
+		return
+	}
+
+	// TODO: Play some damage animation or smth idk
 }

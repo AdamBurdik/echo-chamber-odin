@@ -1,11 +1,11 @@
 package game
 
+import "core:container/queue"
 import "core:fmt"
 import "core:log"
 import random "core:math/rand"
 import "core:strings"
 import rl "vendor:raylib"
-import "core:container/queue"
 
 BOARD_GRID_WIDTH :: 21
 BOARD_GRID_HEIGHT :: 21
@@ -97,7 +97,6 @@ get_tile :: proc(board: ^Board, coord: Coord) -> Tile {
 	return tile
 }
 
-
 draw_board :: proc(board: ^Board, player: ^Player) {
 	surrounding := get_surrounding_coords(player.grid_pos, BOARD_RENDER_DISTANCE)
 
@@ -115,4 +114,13 @@ draw_board :: proc(board: ^Board, player: ^Player) {
 
 get_path_to_player :: proc(board: ^Board, start: Coord, player: ^Player) -> [dynamic]Coord {
 	return search_path(board, start, player.grid_pos)
+}
+
+get_enemy_at :: proc(board: ^Board, coord: Coord) -> (bool, ^Enemy) {
+	for &enemy in board.enemies {
+		if enemy.coord == coord {
+			return true, &enemy
+		}
+	}
+	return false, {}
 }

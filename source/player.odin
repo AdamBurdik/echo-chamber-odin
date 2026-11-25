@@ -61,7 +61,14 @@ draw_player :: proc(player: ^Player) {
 		dest := rl.Rectangle{player_center.x, player_center.y, width, height}
 		origin := rl.Vector2{width / 2, height / 2 + PLAYER_HEIGHT / 1.1}
 
-		rl.DrawTexturePro(effect, source, dest, origin, get_direction_rotation(player.direction), rl.WHITE)
+		rl.DrawTexturePro(
+			effect,
+			source,
+			dest,
+			origin,
+			get_direction_rotation(player.direction),
+			rl.WHITE,
+		)
 	}
 }
 
@@ -133,10 +140,33 @@ rotate_player :: proc(player: ^Player, anti_clockwise: bool) {
 	player.direction = get_rotated_direction(player.direction, anti_clockwise)
 }
 
-slash_player :: proc(player: ^Player) {
+slash_player :: proc(player: ^Player, board: ^Board, damage: i32) {
 	if player.is_slashing {
 		return
 	}
 	player.is_slashing = true
 	player.slashing_t = 0
+
+	dir_vector := get_direction_vector(player.direction)
+	dx := i32(dir_vector.x)
+	dy := i32(dir_vector.y)
+
+	forward := Coord{player.grid_pos.x + i32(dx), player.grid_pos.y + i32(dy)}
+
+	forward_left  := Coord{forward.x - dy, forward.y + dx}
+	forward_right := Coord{forward.x + dy, forward.y - dx}
+
+	coords := [4]Coord{player.grid_pos, forward, forward_left, forward_right}
+
+	for coord in coords {
+		exists, enemy := get_enemy_at(board, coord)
+
+		if !exists {
+			continue
+		}
+
+		damage_enemy(enemy, damage)
+
+	}
+
 }

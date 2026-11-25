@@ -37,11 +37,16 @@ ActionRotate :: struct {
 	anti_clockwise: bool,
 }
 
+ActionSlash :: struct {
+	amount: i32,
+}
+
 CardAction :: union {
 	ActionMove,
 	ActionInstantHeal,
 	ActionRegen,
 	ActionRotate,
+	ActionSlash,
 }
 
 Card :: struct {
