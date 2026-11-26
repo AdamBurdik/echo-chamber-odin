@@ -7,6 +7,7 @@ PLAYER_WIDTH :: 8
 PLAYER_HEIGHT :: 16
 PLAYER_JUMP_DURATION :: 0.35
 PLAYER_JUMP_HEIGHT :: 8
+PLAYER_HIT_TINT_DURATION :: ENEMY_HIT_TINT_DURATION
 
 PLAYER_SLASHING_DURATION :: 0.4
 
@@ -24,6 +25,9 @@ Player :: struct {
 	// Slashing stuff
 	is_slashing:       bool,
 	slashing_t:        f32, // From 0 to 1
+
+	// Hit overlay
+	hit_overlay_t: f32,
 }
 
 draw_player :: proc(player: ^Player) {
@@ -59,13 +63,18 @@ draw_player :: proc(player: ^Player) {
 		dest := rl.Rectangle{player_center.x, player_center.y, width, height}
 		origin := rl.Vector2{width / 2, height / 2 + PLAYER_HEIGHT / 1.1}
 
+		tint := rl.WHITE
+		if player.hit_overlay_t > 0 {
+			tint = COLOR_HIT_OVERLAY
+		}
+
 		rl.DrawTexturePro(
 			effect,
 			source,
 			dest,
 			origin,
 			get_direction_rotation(player.direction),
-			rl.WHITE,
+			tint,
 		)
 	}
 }
@@ -97,6 +106,10 @@ update_player :: proc(dt: f32, player: ^Player, board: ^Board) {
 			player.is_slashing = false
 			player.slashing_t = 0
 		}
+	}
+
+	if player.hit_overlay_t > 0 {
+		player.hit_overlay_t -= dt / PLAYER_HIT_TINT_DURATION
 	}
 }
 
@@ -167,4 +180,19 @@ slash_player :: proc(player: ^Player, board: ^Board, damage: i32) {
 
 	}
 
+}
+
+example_function :: proc(player: ^Player, board: ^Board, damage: i32) {
+	if player.is_slashing {
+		return
+	}
+
+	player.is_slashing = true
+	player.slashing_t = 0
+
+	dir_vector := get_direction_vector(player.direction)
+	dx := i32(dir_vector.x)
+	dy := i32(dir_vector.y)
+
+	forward := Coord{player.grid_pos.x + i32(dx), player.grid_pos.y + i32(dy)}	
 }

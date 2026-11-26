@@ -76,8 +76,10 @@ init :: proc() {
 		},
 	)
 
-	player = Player{{0, 0}, CardinalDirection.DOWN, {}, false, {}, 0, 0, false, 0}
-
+	player = Player{
+		grid_pos = {0, 0},
+		direction = .DOWN,
+	}y
 
 	run = true
 	rl.SetConfigFlags({.FULLSCREEN_MODE, .WINDOW_RESIZABLE, .VSYNC_HINT})

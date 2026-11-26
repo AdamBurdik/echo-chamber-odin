@@ -1,10 +1,14 @@
 package game
 
+import "core:fmt"
+import "core:log"
 import math "core:math"
+import "core:strings"
 import rl "vendor:raylib"
 
 ENEMY_JUMP_DURATION :: 0.35
 ENEMY_JUMP_HEIGHT :: 8
+ENEMY_HIT_TINT_DURATION :: 0.25
 
 EnemyType :: enum {
 	GOBLIN,
@@ -27,6 +31,7 @@ Enemy :: struct {
 	jump_t:            f32,
 	hop_y:             f32,
 	is_dead:           bool,
+	hit_overlay_t:     f32,
 }
 
 get_enemy_texture :: proc(type: EnemyType, direction: CardinalDirection) -> rl.Texture {
@@ -63,7 +68,13 @@ draw_enemy :: proc(enemy: ^Enemy, player: ^Player, board: ^Board) {
 		enemy.hop_y +
 		f32((TILE_SIZE - texture.height) / 2)
 
-	rl.DrawTextureEx(texture, {x, y}, 0, 1, rl.WHITE)
+	tint := rl.WHITE
+
+	if (enemy.hit_overlay_t > 0) {
+		tint = COLOR_HIT_OVERLAY
+	}
+
+	rl.DrawTextureEx(texture, {x, y}, 0, 1, tint)
 }
 
 draw_enemies :: proc(board: ^Board, player: ^Player) {
@@ -73,23 +84,27 @@ draw_enemies :: proc(board: ^Board, player: ^Player) {
 }
 
 update_enemy :: proc(dt: f32, enemy: ^Enemy) {
-	if !enemy.is_jumping {return}
+	if enemy.is_jumping {
+		enemy.jump_t = min(1.0, enemy.jump_t + dt / ENEMY_JUMP_DURATION)
+		t := enemy.jump_t
 
-	enemy.jump_t = min(1.0, enemy.jump_t + dt / ENEMY_JUMP_DURATION)
-	t := enemy.jump_t
+		remaining := 1.0 - ease_in_out_cubic(t)
+		start := enemy.jump_start_offset
+		enemy.jump_offset = {start.x * remaining, start.y * remaining}
 
-	remaining := 1.0 - ease_in_out_cubic(t)
-	start := enemy.jump_start_offset
-	enemy.jump_offset = {start.x * remaining, start.y * remaining}
+		enemy.hop_y = -math.sin(math.PI * t) * ENEMY_JUMP_HEIGHT
 
-	enemy.hop_y = -math.sin(math.PI * t) * ENEMY_JUMP_HEIGHT
+		if t >= 1.0 {
+			enemy.is_jumping = false
+			enemy.jump_offset = {0, 0}
+			enemy.hop_y = 0.0
+			enemy.jump_t = 0.0
+			enemy.jump_start_offset = {0, 0}
+		}
+	}
 
-	if t >= 1.0 {
-		enemy.is_jumping = false
-		enemy.jump_offset = {0, 0}
-		enemy.hop_y = 0.0
-		enemy.jump_t = 0.0
-		enemy.jump_start_offset = {0, 0}
+	if (enemy.hit_overlay_t > 0) {
+		enemy.hit_overlay_t -= dt / ENEMY_HIT_TINT_DURATION
 	}
 }
 
@@ -134,6 +149,8 @@ damage_enemy :: proc(enemy: ^Enemy, damage: i32) {
 		enemy.is_dead = true
 		return
 	}
+
+	enemy.hit_overlay_t = 1
 
 	// TODO: Play some damage animation or smth idk
 }

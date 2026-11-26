@@ -90,7 +90,7 @@ get_tile :: proc(board: ^Board, coord: Coord) -> Tile {
 	}
 
 	if (random <= 3) {
-		append(&board.enemies, Enemy{coord = coord, type = type, health = 100, direction = .DOWN})
+		append(&board.enemies, Enemy{coord = coord, type = type, health = 100, direction = .DOWN, hit_overlay_t = 0})
 	}
 
 
