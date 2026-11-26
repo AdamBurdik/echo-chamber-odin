@@ -9,6 +9,8 @@ import rl "vendor:raylib"
 ENEMY_JUMP_DURATION :: 0.35
 ENEMY_JUMP_HEIGHT :: 8
 ENEMY_HIT_TINT_DURATION :: 0.25
+ENEMY_ATTACK_DURATION :: 0.2
+ENEMY_ATTACK_DISTANCE :: 5
 
 EnemyType :: enum {
 	GOBLIN,
@@ -23,6 +25,7 @@ Enemy :: struct {
 	type:              EnemyType,
 	health:            i32,
 	direction:         CardinalDirection,
+	is_dead:           bool,
 
 	// jump animation
 	is_jumping:        bool,
@@ -30,8 +33,14 @@ Enemy :: struct {
 	jump_offset:       rl.Vector2,
 	jump_t:            f32,
 	hop_y:             f32,
-	is_dead:           bool,
+
+	// Damaging
 	hit_overlay_t:     f32,
+
+	// Hiting animation. Hiting for enemies is just sliding into a player
+	is_attacking:      bool,
+	attack_t:          f32,
+	attack_offset:     rl.Vector2,
 }
 
 get_enemy_texture :: proc(type: EnemyType, direction: CardinalDirection) -> rl.Texture {
@@ -59,14 +68,17 @@ draw_enemy :: proc(enemy: ^Enemy, player: ^Player, board: ^Board) {
 		f32((enemy.coord.x - player.grid_pos.x) * TILE_SIZE) +
 		board.camera_offset.x +
 		enemy.jump_offset.x +
-		f32((TILE_SIZE - texture.width) / 2)
+		f32((TILE_SIZE - texture.width) / 2) +
+		enemy.attack_offset.x
+
 	y :=
 		BOARD_ORIGIN.y +
 		f32((enemy.coord.y - player.grid_pos.y) * TILE_SIZE) +
 		board.camera_offset.y +
 		enemy.jump_offset.y +
 		enemy.hop_y +
-		f32((TILE_SIZE - texture.height) / 2)
+		f32((TILE_SIZE - texture.height) / 2) +
+		enemy.attack_offset.y
 
 	tint := rl.WHITE
 
@@ -106,6 +118,25 @@ update_enemy :: proc(dt: f32, enemy: ^Enemy) {
 	if (enemy.hit_overlay_t > 0) {
 		enemy.hit_overlay_t -= dt / ENEMY_HIT_TINT_DURATION
 	}
+
+	if (enemy.is_attacking) {
+		enemy.attack_t += dt / ENEMY_ATTACK_DURATION
+
+		if enemy.attack_t >= 1 {
+			enemy.attack_offset = {0, 0}
+			enemy.is_attacking = false
+			enemy.attack_t = 0.0
+		} else {
+			offset := math.sin(enemy.attack_t * math.PI)
+
+			dir_vector := get_direction_vector(enemy.direction)
+
+			enemy.attack_offset = {
+				dir_vector.x * ENEMY_ATTACK_DISTANCE * offset,
+				dir_vector.y * ENEMY_ATTACK_DISTANCE * offset,
+			}
+		}
+	}
 }
 
 update_enemies :: proc(dt: f32, board: ^Board) {
@@ -142,6 +173,7 @@ jump_enemy :: proc(enemy: ^Enemy, direction: CardinalDirection, amount: i32, boa
 	enemy.jump_t = 0.0
 }
 
+// Enemy takes damage
 damage_enemy :: proc(enemy: ^Enemy, damage: i32) {
 	enemy.health -= damage
 
@@ -153,4 +185,23 @@ damage_enemy :: proc(enemy: ^Enemy, damage: i32) {
 	enemy.hit_overlay_t = 1
 
 	// TODO: Play some damage animation or smth idk
+}
+
+// The enemy attacks
+attack_enemy :: proc(enemy: ^Enemy, damage: i32, player: ^Player) {
+	if enemy.is_attacking {
+		return
+	}
+
+	dir_vector := get_direction_vector(enemy.direction)
+	dx := i32(dir_vector.x)
+	dy := i32(dir_vector.y)
+
+	forward := Coord{enemy.coord.x + i32(dx), enemy.coord.y + i32(dy)}
+
+	if forward == player.grid_pos {
+		// Player is actually forward, so we can atack him
+		enemy.is_attacking = true
+		damage_player(player, damage)
+	}
 }

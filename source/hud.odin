@@ -1,6 +1,8 @@
 package game
 
 import math "core:math"
+import "core:fmt"
+import "core:strings"
 import rl "vendor:raylib"
 
 BEGIN_BUTTON_WIDTH :: 137
@@ -8,7 +10,7 @@ BEGIN_BUTTON_HEIGHT :: 14
 
 begin_button_hovering := false
 
-draw_hud :: proc() {
+draw_hud :: proc(player: ^Player) {
 	// Draw begin button
 	begin_button_x := ACTION_QUEUE_ORIGIN.x + 8
 	begin_button_y := ACTION_QUEUE_ORIGIN.y + ACTION_QUEUE_HEIGHT + 1
@@ -43,6 +45,37 @@ draw_hud :: proc() {
 			COLOR_BLOCKED_OVERLAY,
 		)
 	}
+
+	// Draw player health
+	heatlh_text := strings.clone_to_cstring(fmt.tprintf("%d HP", player.health), context.temp_allocator)
+
+	rl.DrawTextEx(
+		tiny5_font,
+		heatlh_text,
+		{11, 56},
+		9,
+		0,
+		COLOR_RED,
+	)
+
+	// Draw player XP
+	rl.DrawTextEx(
+		tiny5_font,
+		strings.clone_to_cstring(fmt.tprintf("%d XP", player.experience), context.temp_allocator),
+		{11, 73},
+		9,
+		0,
+		COLOR_ECHO_HIGHLIGHT,
+	)
+
+	rl.DrawTextEx(
+		tiny5_font,
+		strings.clone_to_cstring(fmt.tprintf("%3d", player.xp_level), context.temp_allocator),
+		{51, 73},
+		9,
+		0,
+		COLOR_ECHO_HIGHLIGHT,
+	)
 }
 
 update_hud :: proc(queue: ^Queue) {

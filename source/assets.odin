@@ -43,6 +43,7 @@ COLOR_CARD_HOVERED :: rl.Color{96, 85, 110, 50}
 COLOR_BLOCKED_OVERLAY :: rl.Color{0, 0, 0, 50}
 
 COLOR_RED :: rl.Color{156, 23, 59, 255}
+COLOR_DARK_RED :: rl.Color{102, 15, 49, 255}
 
 COLOR_HIT_OVERLAY :: rl.Color{183, 59, 93, 255}
 

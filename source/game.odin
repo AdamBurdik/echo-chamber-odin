@@ -79,7 +79,7 @@ init :: proc() {
 	player = Player{
 		grid_pos = {0, 0},
 		direction = .DOWN,
-	}y
+	}
 
 	run = true
 	rl.SetConfigFlags({.FULLSCREEN_MODE, .WINDOW_RESIZABLE, .VSYNC_HINT})
@@ -148,7 +148,7 @@ update :: proc() {
 
 		draw_player(&player)
 		draw_queue(&queue)
-		draw_hud()
+		draw_hud(&player)
 	}
 	rl.EndTextureMode()
 

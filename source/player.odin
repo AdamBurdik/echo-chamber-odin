@@ -12,6 +12,7 @@ PLAYER_HIT_TINT_DURATION :: ENEMY_HIT_TINT_DURATION
 PLAYER_SLASHING_DURATION :: 0.4
 
 Player :: struct {
+	health:            i32,
 	grid_pos:          Coord,
 	direction:         CardinalDirection,
 	target_grid_pos:   Coord,
@@ -27,7 +28,11 @@ Player :: struct {
 	slashing_t:        f32, // From 0 to 1
 
 	// Hit overlay
-	hit_overlay_t: f32,
+	hit_overlay_t:     f32,
+
+	// XP
+	experience:        i32,
+	xp_level:          i32,
 }
 
 draw_player :: proc(player: ^Player) {
@@ -46,7 +51,12 @@ draw_player :: proc(player: ^Player) {
 	x := BOARD_ORIGIN.x + f32(TILE_SIZE - PLAYER_WIDTH) / 2
 	y := BOARD_ORIGIN.y - f32(PLAYER_HEIGHT) / 3 + player.hop_y
 
-	rl.DrawTextureEx(texture, {x, y}, 0, 1, rl.WHITE)
+	tint := rl.WHITE
+	if player.hit_overlay_t > 0 {
+		tint = COLOR_HIT_OVERLAY
+	}
+
+	rl.DrawTextureEx(texture, {x, y}, 0, 1, tint)
 
 	if player.is_slashing {
 		frame_index := i32(map_range(player.slashing_t, 0, f32(slash_effect.frame_count)))
@@ -63,10 +73,6 @@ draw_player :: proc(player: ^Player) {
 		dest := rl.Rectangle{player_center.x, player_center.y, width, height}
 		origin := rl.Vector2{width / 2, height / 2 + PLAYER_HEIGHT / 1.1}
 
-		tint := rl.WHITE
-		if player.hit_overlay_t > 0 {
-			tint = COLOR_HIT_OVERLAY
-		}
 
 		rl.DrawTexturePro(
 			effect,
@@ -74,7 +80,7 @@ draw_player :: proc(player: ^Player) {
 			dest,
 			origin,
 			get_direction_rotation(player.direction),
-			tint,
+			rl.WHITE,
 		)
 	}
 }
@@ -109,7 +115,7 @@ update_player :: proc(dt: f32, player: ^Player, board: ^Board) {
 	}
 
 	if player.hit_overlay_t > 0 {
-		player.hit_overlay_t -= dt / PLAYER_HIT_TINT_DURATION
+		player.hit_overlay_t -= dt
 	}
 }
 
@@ -164,7 +170,7 @@ slash_player :: proc(player: ^Player, board: ^Board, damage: i32) {
 
 	forward := Coord{player.grid_pos.x + i32(dx), player.grid_pos.y + i32(dy)}
 
-	forward_left  := Coord{forward.x - dy, forward.y + dx}
+	forward_left := Coord{forward.x - dy, forward.y + dx}
 	forward_right := Coord{forward.x + dy, forward.y - dx}
 
 	coords := [4]Coord{player.grid_pos, forward, forward_left, forward_right}
@@ -182,17 +188,11 @@ slash_player :: proc(player: ^Player, board: ^Board, damage: i32) {
 
 }
 
-example_function :: proc(player: ^Player, board: ^Board, damage: i32) {
-	if player.is_slashing {
-		return
+damage_player :: proc(player: ^Player, damage: i32) {
+	player.hit_overlay_t = PLAYER_HIT_TINT_DURATION
+
+	player.health -= damage
+	if player.health <= 0 {
+		// TODO: Do some death screen or smth idk
 	}
-
-	player.is_slashing = true
-	player.slashing_t = 0
-
-	dir_vector := get_direction_vector(player.direction)
-	dx := i32(dir_vector.x)
-	dy := i32(dir_vector.y)
-
-	forward := Coord{player.grid_pos.x + i32(dx), player.grid_pos.y + i32(dy)}	
 }

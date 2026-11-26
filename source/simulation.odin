@@ -34,13 +34,32 @@ process_card :: proc(card: ^Card, player: ^Player, board: ^Board, queue: ^Queue)
 
 tick_goblin_enemy :: proc(enemy: ^Enemy, board: ^Board, player: ^Player) {
 	path := get_path_to_player(board, enemy.coord, player)
-	if len(path) < 1 {
+	path_len := len(path)
+	if path_len < 1 {
 		// This means the enemy is standing on a player, which should not be possible....
 		return
 	}
 
-	next_step := path[0]
-	jump_enemy(enemy, get_direction_between(enemy.coord, next_step), 1, board)
+	if path_len == 1 {
+		// Enemy is right next to player
+		// So attack should happen
+
+		player_dir := get_direction_between(enemy.coord, player.grid_pos)
+		if enemy.direction != player_dir {
+			// Enemy is not looking at player, so it should first rotate
+			enemy.direction = player_dir
+			return
+		}
+
+		// TODO: Change enemy damage
+		// TODO: Check if player is actually next to enemy
+		attack_enemy(enemy, 10, player)
+
+	} else {
+		// Enemy is at least 1 tile away from player
+		next_step := path[0]
+		jump_enemy(enemy, get_direction_between(enemy.coord, next_step), 1, board)
+	}
 }
 
 tick_enemies :: proc(board: ^Board, player: ^Player) {
