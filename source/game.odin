@@ -79,6 +79,8 @@ init :: proc() {
 	player = Player{
 		grid_pos = {0, 0},
 		direction = .DOWN,
+		max_health = 100,
+		health = 90y,
 	}
 
 	run = true

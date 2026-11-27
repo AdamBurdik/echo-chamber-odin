@@ -13,6 +13,7 @@ PLAYER_SLASHING_DURATION :: 0.4
 
 Player :: struct {
 	health:            i32,
+	max_health:        i32,
 	grid_pos:          Coord,
 	direction:         CardinalDirection,
 	target_grid_pos:   Coord,
