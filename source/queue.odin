@@ -147,13 +147,34 @@ draw_card :: proc(rect: rl.Rectangle, card: ^Card) {
 	}
 
 	if card.is_hovered && !is_simulation_running {
-		rl.DrawRectangle(
-			i32(rect.x),
-			i32(rect.y),
-			i32(rect.width),
-			i32(rect.height),
-			COLOR_CARD_HOVERED,
+		move_offset := math.min(0, math.max(-rect.width + 5, card.moved_distance))
+
+		rl.DrawRectangleRec(
+			{
+				rect.x + rect.width - 5 + move_offset,
+				rect.y,
+				5,
+				rect.height,
+			},
+			rl.ORANGE,
 		)
+
+		rl.DrawRectangleRec(
+			{
+				rect.x + rect.width + move_offset,
+				rect.y,
+				-move_offset,
+				rect.height,
+			},
+			COLOR_RED,
+		)
+		// rl.DrawRectangle(
+		// 	i32(rect.x),
+		// 	i32(rect.y),
+		// 	i32(rect.width),
+		// 	i32(rect.height),
+		// 	COLOR_CARD_HOVERED,
+		// )
 	}
 }
 
@@ -247,14 +268,40 @@ update_queue :: proc(queue: ^Queue) {
 		rect := card_rect.rect
 		card := card_rect.card
 
+		if card.is_being_moved && rl.IsMouseButtonDown(rl.MouseButton.LEFT) {
+			card.moved_distance = mouse_x - card.mouse_pos.x
+			return
+		}
+
 		if check_collision(rect, mouse_x, mouse_y) {
 			card.is_hovered = true
+			if rl.IsMouseButtonPressed(rl.MouseButton.LEFT) {
+
+				if check_collision(
+					{
+						rect.x + rect.width - 5,
+						rect.y,
+						5,
+						rect.height,
+					},
+					mouse_x,
+					mouse_y,
+				) {
+					card.is_being_moved = true
+					card.mouse_pos = {mouse_x, mouse_y}
+					log.info("Starting move")
+					return
+				}
+
+
+			}
 			if rl.IsMouseButtonReleased(rl.MouseButton.LEFT) {
 				handle_card_click(queue, card)
 				return
 			}
 		} else {
 			card.is_hovered = false
+			card.is_being_moved = false
 		}
 	}
 

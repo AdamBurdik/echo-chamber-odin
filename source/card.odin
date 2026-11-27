@@ -50,13 +50,18 @@ CardAction :: union {
 }
 
 Card :: struct {
-	icon:          CardIcon,
-	lines:         [dynamic]string,
-	actions:       [dynamic]CardAction,
-	is_selected:   bool,
-	is_echo:       bool,
-	is_hovered:    bool,
-	echo_cooldown: i32,
+	icon:           CardIcon,
+	lines:          [dynamic]string,
+	actions:        [dynamic]CardAction,
+	is_selected:    bool,
+	is_echo:        bool,
+	is_hovered:     bool,
+	echo_cooldown:  i32,
+
+	// Interactive stuff
+	is_being_moved: bool,
+	mouse_pos:      rl.Vector2,
+	moved_distance: f32,
 }
 
 CardRect :: struct {
