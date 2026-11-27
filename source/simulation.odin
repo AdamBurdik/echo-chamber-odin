@@ -1,5 +1,7 @@
 package game
 
+import random "core:math/rand"
+
 is_simulation_running := false
 simulation_cooldown := f32(0)
 rotation_streak := 0
@@ -42,6 +44,24 @@ process_card :: proc(card: ^Card, player: ^Player, board: ^Board, queue: ^Queue)
 }
 
 tick_goblin_enemy :: proc(enemy: ^Enemy, board: ^Board, player: ^Player) {
+	if get_distance_from_player(player, enemy.coord) > 5 {
+		// When enemy is too far away from player, it should just move randomly
+
+		dx := random.int32_range(-4, 4)
+		dy := random.int32_range(-4, 4)
+
+		path := search_path(board, enemy.coord, {enemy.coord.x + dx, enemy.coord.y + dy})
+		if len(path) > 0 {
+			next_step := path[0]
+			jump_enemy(enemy, get_direction_between(enemy.coord, next_step), 1, board)
+		} else {
+			// Enemy cant go to the random offset
+			// TODO: Do some idle animation or smth
+		}
+
+		return
+	}
+
 	path := get_path_to_player(board, enemy.coord, player)
 	path_len := len(path)
 	if path_len < 1 {

@@ -154,3 +154,7 @@ is_valid_and_walkable :: proc(board: ^Board, coord: Coord) -> bool {
 	exists, _ := get_enemy_at(board, coord)
     return !exists
 }
+
+get_distance_from_player :: proc(player: ^Player, coord: Coord) -> i32 {
+	return math.abs(player.grid_pos.x - coord.x) + math.abs(player.grid_pos.y - coord.y)
+}
