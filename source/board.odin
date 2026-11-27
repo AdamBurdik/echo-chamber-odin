@@ -19,6 +19,9 @@ BOARD_ORIGIN :: rl.Vector2 {
 	138,
 }
 
+// TODO: Remove this
+cultist_spawned := false
+
 Coord :: struct {
 	x: i32,
 	y: i32,
@@ -85,8 +88,9 @@ get_tile :: proc(board: ^Board, coord: Coord) -> Tile {
 		type = .GOBLIN
 	} else if (random <= 2) {
 		type = .SLIME_FULL
-	} else if (random <= 3) {
+	} else if (random <= 3 && !cultist_spawned) {
 		type = .CULTIST
+		cultist_spawned = true
 	}
 
 	if (random <= 3) {

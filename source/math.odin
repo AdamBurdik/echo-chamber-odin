@@ -115,3 +115,21 @@ get_direction_between :: proc(from, to: Coord) -> CardinalDirection {
 map_range :: proc(t: f32, min: f32, max: f32) -> f32 {
 	return min + (t) * (max - min)
 }
+
+// Returns angle in radians
+get_coord_angle :: proc(origin: Coord, other: Coord) -> f32 {
+	dx := f32(other.x - origin.x)
+	dy := f32(other.y - origin.y)
+
+	return math.atan2(dy, dx)
+}
+
+get_tile_from_angle :: proc(start: Coord, angle_rad: f32, distance: f32) -> Coord {
+	x1 := start.x
+	y1 := start.y
+
+	x2 := f32(x1) + distance * math.cos(angle_rad)
+	y2 := f32(y1) + distance * math.sin(angle_rad)
+
+	return {i32(math.round(x2)), i32(math.round(y2))}
+}

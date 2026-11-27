@@ -21,6 +21,7 @@ ASSETS_FULL_IDLE_SLIME := #load_directory("../assets/slime/full/idle")
 ASSETS_HALF_IDLE_SLIME := #load_directory("../assets/slime/full/idle")
 ASSETS_QUARTER_IDLE_SLIME := #load_directory("../assets/slime/full/idle")
 ASSETS_EFFECTS_SLASH := #load_directory("../assets/effects/slash")
+ASSETS_EFFECTS_SUMMONING_CIRCLE := #load_directory("../assets/effects/summoning_circle")
 
 // Color pallete
 COLOR_VOID :: rl.Color{13, 12, 21, 255}
@@ -73,12 +74,14 @@ m3x6_font: rl.Font
 // Enemies
 goblin_idle: DirectionalEntity
 cultist_idle: DirectionalEntity
+cultist_summon: DirectionalEntity
 slime_full: DirectionalEntity
 slime_half: DirectionalEntity
 slime_quarter: DirectionalEntity
 
 // Effects
 slash_effect: AnimationFrames
+summoning_circle_effect: AnimationFrames
 
 
 DirectionalEntity :: struct {
@@ -126,10 +129,12 @@ init_assets :: proc() {
 
 	add_assets("goblin_idle", ASSETS_IDLE_GOBLIN)
 	add_assets("cultist_idle", ASSETS_IDLE_CULTIST)
+	add_assets("cultist_summon", ASSETS_SUMMON_CULTIST)
 	add_assets("slime_full_idle", ASSETS_FULL_IDLE_SLIME)
 	add_assets("slime_half_idle", ASSETS_HALF_IDLE_SLIME)
 	add_assets("slime_quarter_idle", ASSETS_QUARTER_IDLE_SLIME)
 	add_assets("effects_slash", ASSETS_EFFECTS_SLASH)
+	add_assets("effects_summoning_circle", ASSETS_EFFECTS_SUMMONING_CIRCLE)
 }
 
 load_assets :: proc() {
@@ -158,11 +163,14 @@ load_assets :: proc() {
 
 	goblin_idle = load_directional_entity("goblin_idle")
 	cultist_idle = load_directional_entity("cultist_idle")
+	cultist_summon = load_directional_entity("cultist_summon")
 	slime_full = load_directional_entity("slime_full_idle")
 	slime_half = load_directional_entity("slime_half_idle")
 	slime_quarter = load_directional_entity("slime_quarter_idle")
 
 	slash_effect = load_frames("effects_slash")
+	summoning_circle_effect = load_frames("effects_summoning_circle")
+	
 }
 
 // load_texture :: proc(bytes: []u8) -> rl.Texture {

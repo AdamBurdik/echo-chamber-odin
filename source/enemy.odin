@@ -21,29 +21,39 @@ EnemyType :: enum {
 }
 
 Enemy :: struct {
-	coord:             Coord,
-	type:              EnemyType,
-	health:            i32,
-	direction:         CardinalDirection,
-	is_dead:           bool,
+	coord:              Coord,
+	type:               EnemyType,
+	health:             i32,
+	direction:          CardinalDirection,
+	is_dead:            bool,
 
 	// jump animation
-	is_jumping:        bool,
-	jump_start_offset: rl.Vector2,
-	jump_offset:       rl.Vector2,
-	jump_t:            f32,
-	hop_y:             f32,
+	is_jumping:         bool,
+	jump_start_offset:  rl.Vector2,
+	jump_offset:        rl.Vector2,
+	jump_t:             f32,
+	hop_y:              f32,
 
 	// Damaging
-	hit_overlay_t:     f32,
+	hit_overlay_t:      f32,
 
 	// Hiting animation. Hiting for enemies is just sliding into a player
-	is_attacking:      bool,
-	attack_t:          f32,
-	attack_offset:     rl.Vector2,
+	is_attacking:       bool,
+	attack_t:           f32,
+	attack_offset:      rl.Vector2,
+
+	// Cultist specific stuff
+	// It should be probably seperated to like union or smth
+	// but im too lazy for that
+	is_summoning:       bool,
+	summoning_t:        f32,
+	summoning_cooldown: f32,
 }
 
-get_enemy_texture :: proc(type: EnemyType, direction: CardinalDirection) -> rl.Texture {
+get_enemy_texture :: proc(enemy: ^Enemy) -> rl.Texture {
+	type := enemy.type
+	direction := enemy.direction
+
 	switch type {
 	case .GOBLIN:
 		return get_texture_from_directional_entity(&goblin_idle, direction)
@@ -54,13 +64,16 @@ get_enemy_texture :: proc(type: EnemyType, direction: CardinalDirection) -> rl.T
 	case .SLIME_QUARTER:
 		return get_texture_from_directional_entity(&slime_quarter, direction)
 	case .CULTIST:
+		if enemy.is_summoning {
+			return get_texture_from_directional_entity(&cultist_summon, direction)
+		}
 		return get_texture_from_directional_entity(&cultist_idle, direction)
 	}
 	panic("Unhandled EnemyType case")
 }
 
 draw_enemy :: proc(enemy: ^Enemy, player: ^Player, board: ^Board) {
-	texture := get_enemy_texture(enemy.type, enemy.direction)
+	texture := get_enemy_texture(enemy)
 
 	// TODO: fix centering
 	x :=
@@ -79,6 +92,24 @@ draw_enemy :: proc(enemy: ^Enemy, player: ^Player, board: ^Board) {
 		enemy.hop_y +
 		f32((TILE_SIZE - texture.height) / 2) +
 		enemy.attack_offset.y
+
+	player_center := rl.Vector2{x + f32(texture.width) / 2, y + f32(texture.height) / 2}
+
+	if enemy.is_summoning {
+		frame_index := i32(map_range(enemy.summoning_t, 0, f32(summoning_circle_effect.frame_count)))
+		summoning_texture := summoning_circle_effect.frames[frame_index]
+
+		rl.DrawTextureEx(
+			summoning_texture,
+			{
+				player_center.x - f32(summoning_texture.width) / 2,
+				player_center.y - f32(summoning_texture.height) / 2,
+			},
+			0,
+			1,
+			rl.WHITE,
+		)
+	}
 
 	tint := rl.WHITE
 
@@ -137,6 +168,18 @@ update_enemy :: proc(dt: f32, enemy: ^Enemy) {
 			}
 		}
 	}
+
+	if enemy.is_summoning {
+		enemy.summoning_t += dt / CULTIST_SUMMONING_DURATION
+		if enemy.summoning_t >= 1 {
+			enemy.is_summoning = false
+			enemy.summoning_cooldown = 1
+		}
+	}
+	if enemy.summoning_cooldown > 0 {
+		enemy.summoning_cooldown -= dt / CULTIST_SUMMONING_COOLDOWN
+	}
+
 }
 
 update_enemies :: proc(dt: f32, board: ^Board) {
