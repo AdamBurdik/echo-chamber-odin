@@ -80,7 +80,10 @@ init :: proc() {
 		grid_pos = {0, 0},
 		direction = .DOWN,
 		max_health = 100,
-		health = 90y,
+		health = 90,
+		experience = 50,
+		required_xp = 150,
+		xp_level = 2,
 	}
 
 	run = true

@@ -34,6 +34,7 @@ Player :: struct {
 	// XP
 	experience:        i32,
 	xp_level:          i32,
+	required_xp:       i32,
 }
 
 draw_player :: proc(player: ^Player) {
@@ -196,4 +197,8 @@ damage_player :: proc(player: ^Player, damage: i32) {
 	if player.health <= 0 {
 		// TODO: Do some death screen or smth idk
 	}
+}
+
+heal_player :: proc(player: ^Player, amount: i32) {
+	player.health = math.min(player.max_health, player.health + amount)
 }

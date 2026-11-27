@@ -9,7 +9,7 @@ process_card :: proc(card: ^Card, player: ^Player, board: ^Board, queue: ^Queue)
 		case ActionMove:
 			jump_player(player, player.direction, act.distance, board)
 		case ActionInstantHeal:
-
+			heal_player(player, act.amount)
 		case ActionRegen:
 
 		case ActionRotate:
