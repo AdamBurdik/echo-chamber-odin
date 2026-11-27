@@ -123,8 +123,8 @@ draw_card :: proc(rect: rl.Rectangle, card: ^Card) {
 	rl.DrawTextureEx(
 		icon_texture,
 		{
-			rect.x + rect.width - f32(icon_texture.width) - 8,
-			rect.y + (rect.height - f32(icon_texture.height)) / 2,
+			rect.x + rect.width - f32(icon_texture.width) - 4,
+			rect.y + (rect.height - f32(icon_texture.height)) / 2 - 1,
 		},
 		0,
 		1,
