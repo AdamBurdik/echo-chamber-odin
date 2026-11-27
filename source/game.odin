@@ -23,9 +23,18 @@ board: Board
 virtual_texture: rl.RenderTexture
 queue: Queue
 player: Player
+game_state: GameState
+
+GameState :: struct {
+	scene: Scene,
+}
 
 init :: proc() {
 	init_assets()
+
+	game_state = {
+		scene = .GAMEPLAY,
+	}
 
 	// Initialize systems and other stuff
 	board = create_board()
@@ -90,13 +99,14 @@ init :: proc() {
 	)
 
 	player = Player {
-		grid_pos    = {0, 0},
-		direction   = .DOWN,
-		max_health  = 100,
-		health      = 90,
-		experience  = 50,
-		required_xp = 150,
-		xp_level    = 2,
+		grid_pos         = {0, 0},
+		direction        = .DOWN,
+		max_health       = 100,
+		health           = 90,
+		experience       = 50,
+		required_xp      = 150,
+		xp_level         = 2,
+		level_multiplier = 1,
 	}
 
 	run = true
@@ -130,27 +140,15 @@ update :: proc() {
 	destRec := rl.Rectangle{0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT}
 	origin := rl.Vector2{0, 0}
 
-	update_queue(&queue)
-	update_player(dt, &player, &board)
-	update_hud(&queue)
-	update_simulation(dt, &queue, &player, &board)
-	update_enemies(dt, &board)
+	switch game_state.scene {
+	case .MAIN_MENU:
 
-	// TODO: Remove
-	if rl.IsKeyReleased(rl.KeyboardKey.W) {
-		jump_player(&player, CardinalDirection.UP, 1, &board)
-	}
-	if rl.IsKeyReleased(rl.KeyboardKey.S) {
-		jump_player(&player, CardinalDirection.DOWN, 1, &board)
-	}
-	if rl.IsKeyReleased(rl.KeyboardKey.A) {
-		jump_player(&player, CardinalDirection.LEFT, 1, &board)
-	}
-	if rl.IsKeyReleased(rl.KeyboardKey.D) {
-		jump_player(&player, CardinalDirection.RIGHT, 1, &board)
-	}
-	if rl.IsKeyReleased(rl.KeyboardKey.SPACE) {
-		slash_player(&player, &board, 50)
+
+	case .GAMEPLAY:
+		update_gameplay_scene(dt, &queue, &player, &board)
+
+	case .DEATH_SCREEN:
+
 	}
 
 	// -- Virtual Drawing --
@@ -158,15 +156,16 @@ update :: proc() {
 	{
 		rl.ClearBackground({0, 0, 0, 255})
 
-		// TODO: Actually draw backdrop
-		draw_board(&board, &player)
-		draw_enemies(&board, &player)
+		switch game_state.scene {
+		case .MAIN_MENU:
 
-		rl.DrawTexture(backdrop_texture, 0, 0, rl.WHITE)
 
-		draw_player(&player)
-		draw_queue(&queue)
-		draw_hud(&player)
+		case .GAMEPLAY:
+			draw_gameplay_scene(&queue, &player, &board)
+
+		case .DEATH_SCREEN:
+
+		}
 	}
 	rl.EndTextureMode()
 

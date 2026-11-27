@@ -1,8 +1,8 @@
 package game
 
 import math "core:math"
-import rl "vendor:raylib"
 import "core:strings"
+import rl "vendor:raylib"
 
 PLAYER_WIDTH :: 8
 PLAYER_HEIGHT :: 16
@@ -37,6 +37,7 @@ Player :: struct {
 	experience:         i32,
 	xp_level:           i32,
 	required_xp:        i32,
+	level_multiplier:   f32,
 
 	// Fun stuff
 	message:            string,
@@ -94,20 +95,12 @@ draw_player :: proc(player: ^Player) {
 	if player.message_cooldown_t > 0 {
 		text := strings.clone_to_cstring(player.message, context.temp_allocator)
 
-		text_size := rl.MeasureTextEx(
-			tiny5_font,
-			text,
-			9,
-			0,
-		)
+		text_size := rl.MeasureTextEx(tiny5_font, text, 9, 0)
 
 		rl.DrawTextEx(
 			tiny5_font,
 			text,
-			{
-				math.round(player_center.x - text_size.x / 2),
-				y - 9,
-			},
+			{math.round(player_center.x - text_size.x / 2), y - 9},
 			9,
 			0,
 			COLOR_CHARTREUSE,
@@ -220,7 +213,7 @@ slash_player :: proc(player: ^Player, board: ^Board, damage: i32) {
 			continue
 		}
 
-		damage_enemy(enemy, damage)
+		damage_enemy(enemy, player, damage)
 
 	}
 
@@ -242,4 +235,13 @@ heal_player :: proc(player: ^Player, amount: i32) {
 player_say :: proc(player: ^Player, message: string) {
 	player.message = message
 	player.message_cooldown_t = 1
+}
+
+give_xp :: proc(player: ^Player, amount: i32) {
+	player.experience += i32(f32(amount) * player.level_multiplier)
+	if player.experience >= player.required_xp {
+		player.experience = math.max(0, player.experience - player.required_xp)
+		player.xp_level += 1
+		player.level_multiplier += 0.25
+	}
 }

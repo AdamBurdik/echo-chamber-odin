@@ -72,6 +72,27 @@ get_enemy_texture :: proc(enemy: ^Enemy) -> rl.Texture {
 	panic("Unhandled EnemyType case")
 }
 
+get_kill_xp_amount :: proc(enemy: ^Enemy) -> i32 {
+	type := enemy.type
+
+	switch type {
+	case .GOBLIN:
+		return 10
+	case .SLIME_FULL:
+		return 10
+	case .SLIME_HALF:
+		return 6
+	case .SLIME_QUARTER:
+		return 2
+	case .CULTIST:
+		if enemy.is_summoning {
+			return 20
+		}
+		return 15
+	}
+	panic("Unhandled EnemyType case")
+}
+
 draw_enemy :: proc(enemy: ^Enemy, player: ^Player, board: ^Board) {
 	texture := get_enemy_texture(enemy)
 
@@ -96,7 +117,9 @@ draw_enemy :: proc(enemy: ^Enemy, player: ^Player, board: ^Board) {
 	player_center := rl.Vector2{x + f32(texture.width) / 2, y + f32(texture.height) / 2}
 
 	if enemy.is_summoning {
-		frame_index := i32(map_range(enemy.summoning_t, 0, f32(summoning_circle_effect.frame_count)))
+		frame_index := i32(
+			map_range(enemy.summoning_t, 0, f32(summoning_circle_effect.frame_count)),
+		)
 		summoning_texture := summoning_circle_effect.frames[frame_index]
 
 		rl.DrawTextureEx(
@@ -217,11 +240,12 @@ jump_enemy :: proc(enemy: ^Enemy, direction: CardinalDirection, amount: i32, boa
 }
 
 // Enemy takes damage
-damage_enemy :: proc(enemy: ^Enemy, damage: i32) {
+damage_enemy :: proc(enemy: ^Enemy, player: ^Player, damage: i32) {
 	enemy.health -= damage
 
 	if (enemy.health <= 0) {
 		enemy.is_dead = true
+		give_xp(player, get_kill_xp_amount(enemy))
 		return
 	}
 

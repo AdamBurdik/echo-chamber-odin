@@ -43,15 +43,6 @@ create_board :: proc() -> Board {
 	board := Board{}
 	board.grid = make(map[Coord]Tile)
 
-	for y := i32(-BOARD_GRID_HEIGHT / 2); y < BOARD_GRID_HEIGHT / 2 + 1; y += 1 {
-		for x := i32(-BOARD_GRID_WIDTH / 2); x < BOARD_GRID_WIDTH / 2 + 1; x += 1 {
-			coord := Coord{x, y}
-
-			board.grid[coord] = {0}
-		}
-
-	}
-
 	return board
 }
 
@@ -81,15 +72,15 @@ get_tile :: proc(board: ^Board, coord: Coord) -> Tile {
 	tile = Tile{0}
 	board.grid[coord] = tile
 
-	random := random.int32_range(0, 20)
+	random := random.int32_range(0, 100)
 	type := EnemyType.GOBLIN
 
 	if random <= 1 {
-		type = .GOBLIN
-	} else if (random <= 2) {
-		type = .SLIME_FULL
-	} else if (random <= 3 && !cultist_spawned) {
 		type = .CULTIST
+	} else if (random <= 8) {
+		type = .SLIME_FULL
+	} else if (random <= 16) {
+		type = .GOBLIN
 		cultist_spawned = true
 	}
 
