@@ -1,6 +1,9 @@
 package game
 
 import "core:math"
+import "core:log"
+
+MAX_SEARCH_ITERATIONS :: 100
 
 SearchTile :: struct {
 	coord: Coord,
@@ -49,7 +52,16 @@ search_path :: proc(board: ^Board, start: Coord, target: Coord) -> [dynamic]Coor
 	found := false
 	target_tile: SearchTile
 
+	i := 0
+
 	for len(searched_tiles) > 0 {
+		i += 1
+
+		if i > MAX_SEARCH_ITERATIONS {
+			log.warn("Max iterations reached")
+			return {}
+		}
+
 		lowest_ptr := get_lowest_f_cost_tile(&searched_tiles)
 		if lowest_ptr == nil {
 			break
@@ -139,5 +151,6 @@ get_lowest_f_cost_tile :: proc(searched_tiles: ^map[Coord]SearchTile) -> ^Search
 
 is_valid_and_walkable :: proc(board: ^Board, coord: Coord) -> bool {
     // TODO: Check if surrounding is walkable
-    return true
+	exists, _ := get_enemy_at(board, coord)
+    return !exists
 }

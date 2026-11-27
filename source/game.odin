@@ -64,6 +64,19 @@ init :: proc() {
 			is_hovered = false,
 		},
 	)
+	for i := 0; i < 10; i += 1 {
+		add_card_to_action(
+			&queue,
+			Card {
+				icon = .CLOCKWISE,
+				lines = [dynamic]string{"Rotate right"},
+				actions = {ActionRotate{anti_clockwise = false}},
+				is_selected = false,
+				is_echo = false,
+				is_hovered = false,
+			},
+		)
+	}
 	add_card_to_action(
 		&queue,
 		Card {
@@ -76,14 +89,14 @@ init :: proc() {
 		},
 	)
 
-	player = Player{
-		grid_pos = {0, 0},
-		direction = .DOWN,
-		max_health = 100,
-		health = 90,
-		experience = 50,
+	player = Player {
+		grid_pos    = {0, 0},
+		direction   = .DOWN,
+		max_health  = 100,
+		health      = 90,
+		experience  = 50,
 		required_xp = 150,
-		xp_level = 2,
+		xp_level    = 2,
 	}
 
 	run = true

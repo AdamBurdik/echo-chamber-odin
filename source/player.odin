@@ -2,39 +2,45 @@ package game
 
 import math "core:math"
 import rl "vendor:raylib"
+import "core:strings"
 
 PLAYER_WIDTH :: 8
 PLAYER_HEIGHT :: 16
 PLAYER_JUMP_DURATION :: 0.35
 PLAYER_JUMP_HEIGHT :: 8
 PLAYER_HIT_TINT_DURATION :: ENEMY_HIT_TINT_DURATION
+PLAYER_MESSAGE_DURATION :: 3
 
 PLAYER_SLASHING_DURATION :: 0.4
 
 Player :: struct {
-	health:            i32,
-	max_health:        i32,
-	grid_pos:          Coord,
-	direction:         CardinalDirection,
-	target_grid_pos:   Coord,
+	health:             i32,
+	max_health:         i32,
+	grid_pos:           Coord,
+	direction:          CardinalDirection,
+	target_grid_pos:    Coord,
 
 	// Jumping stuff
-	is_jumping:        bool,
-	jump_start_offset: rl.Vector2,
-	jump_t:            f32,
-	hop_y:             f32,
+	is_jumping:         bool,
+	jump_start_offset:  rl.Vector2,
+	jump_t:             f32,
+	hop_y:              f32,
 
 	// Slashing stuff
-	is_slashing:       bool,
-	slashing_t:        f32, // From 0 to 1
+	is_slashing:        bool,
+	slashing_t:         f32, // From 0 to 1
 
 	// Hit overlay
-	hit_overlay_t:     f32,
+	hit_overlay_t:      f32,
 
 	// XP
-	experience:        i32,
-	xp_level:          i32,
-	required_xp:       i32,
+	experience:         i32,
+	xp_level:           i32,
+	required_xp:        i32,
+
+	// Fun stuff
+	message:            string,
+	message_cooldown_t: f32,
 }
 
 draw_player :: proc(player: ^Player) {
@@ -52,6 +58,7 @@ draw_player :: proc(player: ^Player) {
 
 	x := BOARD_ORIGIN.x + f32(TILE_SIZE - PLAYER_WIDTH) / 2
 	y := BOARD_ORIGIN.y - f32(PLAYER_HEIGHT) / 3 + player.hop_y
+	player_center := rl.Vector2{x + (PLAYER_WIDTH / 2), y + (PLAYER_HEIGHT / 2)}
 
 	tint := rl.WHITE
 	if player.hit_overlay_t > 0 {
@@ -68,8 +75,6 @@ draw_player :: proc(player: ^Player) {
 		width := f32(effect.width)
 		height := f32(effect.height)
 
-		player_center := rl.Vector2{x + (PLAYER_WIDTH / 2), y + (PLAYER_HEIGHT / 2)}
-
 		source := rl.Rectangle{0, 0, f32(effect.width), f32(effect.height)}
 		// dest := rl.Rectangle{x - f32(effect.width) / 3, y - f32(effect.height) / 1.2, f32(effect.width), f32(effect.height)}
 		dest := rl.Rectangle{player_center.x, player_center.y, width, height}
@@ -83,6 +88,29 @@ draw_player :: proc(player: ^Player) {
 			origin,
 			get_direction_rotation(player.direction),
 			rl.WHITE,
+		)
+	}
+
+	if player.message_cooldown_t > 0 {
+		text := strings.clone_to_cstring(player.message, context.temp_allocator)
+
+		text_size := rl.MeasureTextEx(
+			tiny5_font,
+			text,
+			9,
+			0,
+		)
+
+		rl.DrawTextEx(
+			tiny5_font,
+			text,
+			{
+				math.round(player_center.x - text_size.x / 2),
+				y - 9,
+			},
+			9,
+			0,
+			COLOR_CHARTREUSE,
 		)
 	}
 }
@@ -118,6 +146,14 @@ update_player :: proc(dt: f32, player: ^Player, board: ^Board) {
 
 	if player.hit_overlay_t > 0 {
 		player.hit_overlay_t -= dt
+	}
+
+	if player.message_cooldown_t > 0 {
+		player.message_cooldown_t -= dt / PLAYER_MESSAGE_DURATION
+		if player.message_cooldown_t <= 0 {
+			player.message_cooldown_t = 0
+			player.message = ""
+		}
 	}
 }
 
@@ -201,4 +237,9 @@ damage_player :: proc(player: ^Player, damage: i32) {
 
 heal_player :: proc(player: ^Player, amount: i32) {
 	player.health = math.min(player.max_health, player.health + amount)
+}
+
+player_say :: proc(player: ^Player, message: string) {
+	player.message = message
+	player.message_cooldown_t = 1
 }

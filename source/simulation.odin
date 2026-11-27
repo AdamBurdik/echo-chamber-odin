@@ -2,21 +2,30 @@ package game
 
 is_simulation_running := false
 simulation_cooldown := f32(0)
+rotation_streak := 0
 
 process_card :: proc(card: ^Card, player: ^Player, board: ^Board, queue: ^Queue) {
 	for action in card.actions {
 		switch act in action {
 		case ActionMove:
 			jump_player(player, player.direction, act.distance, board)
+			rotation_streak = 0
 		case ActionInstantHeal:
 			heal_player(player, act.amount)
+			rotation_streak = 0
 		case ActionRegen:
-
+			rotation_streak = 0
 		case ActionRotate:
 			rotate_player(player, act.anti_clockwise)
+			rotation_streak += 1
+
+			if rotation_streak > 3 {
+				player_say(player, "spin me right round")
+			}
 
 		case ActionSlash:
 			slash_player(player, board, act.amount)
+			rotation_streak = 0
 		}
 	}
 
